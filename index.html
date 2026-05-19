@@ -1,0 +1,3124 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000008">
+<title>LifeOps — Galactic Edition</title>
+<script>
+// Load Telegram SDK — fails gracefully if blocked
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://telegram.org/js/telegram-web-app.js';
+  s.onerror = function() { console.log('TG SDK blocked — running standalone'); };
+  document.head.appendChild(s);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Reem+Kufi+Fun:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800&family=Lalezar&display=swap" rel="stylesheet" onerror="this.remove()">
+<style>
+/* ══ PERSIAN COSMIC FONT STACK ══
+   Trick: declare @font-face with unicode-range so the browser auto-picks the
+   right font per character. Latin/numbers → Orbitron/Rajdhani (epic Western).
+   Arabic/Persian range (U+0600-06FF + U+FB50-FDFF + U+FE70-FEFF) → Reem Kufi
+   for display, Vazirmatn for body. This means we don't have to manually tag
+   text as Persian — it just works. */
+
+/* Display: Persian geometric/cosmic for headlines, brand, buttons */
+@font-face {
+  font-family: 'CosmicFa';
+  src: local('Reem Kufi Fun'), local('Reem Kufi');
+  font-weight: 400;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C, U+200F;
+}
+@font-face {
+  font-family: 'CosmicFa';
+  src: local('Reem Kufi Fun'), local('Reem Kufi');
+  font-weight: 700;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C, U+200F;
+}
+
+/* Body: Persian readable for missions, chat, captions */
+@font-face {
+  font-family: 'BodyFa';
+  src: local('Vazirmatn');
+  font-weight: 300 800;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C, U+200F;
+}
+
+/* Accent: bold pop for XP/streak counters */
+@font-face {
+  font-family: 'AccentFa';
+  src: local('Lalezar');
+  font-weight: 400;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C, U+200F;
+}
+/* ══ PERSIAN TEXT POLISH ══
+   When Persian/Arabic chars render via CosmicFa/BodyFa, they need slightly
+   different metrics for visual balance with the Latin display fonts. */
+:root {
+  --font-orbitron: 'Orbitron', 'Courier New', monospace;
+  --font-rajdhani: 'Rajdhani', Tahoma, 'Segoe UI', sans-serif;
+  --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+}
+
+/* Force latin numerals even inside Persian text for that cosmic monospace feel */
+.sv, .clk, .xpval, .stnum, .lp, .ld {
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+/* Persian/Arabic characters get a touch more spacing and lower contrast for elegance */
+:lang(fa), [dir="rtl"], .aim, .aimsg, .mt, .bt-tx, .bn, .cap-in, .aii {
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  -webkit-font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+/* The brand badge in RTL with Reem Kufi looks tall — pull tighter line-height */
+.bn, .aihb, .itl {
+  line-height: 1.15;
+}
+</style>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --g:#00ff88;--cy:#00d4ff;--pu:#9b59ff;--pu2:#6c2fff;
+  --vi:#c084fc;--re:#ff4466;--am:#ffb700;--wh:#e8f0ff;
+  --mag:#ff3ec9;--au:#9dffb0;
+  --bg0:#000008;--bg1:#04001e;
+  --bd:rgba(155,89,255,.22);--bdg:rgba(0,255,136,.18);
+  --safe:env(safe-area-inset-bottom,0px);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg0);color:var(--wh);font-family:'Rajdhani','BodyFa',Tahoma,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+#cosmos{position:fixed;inset:0;z-index:0;pointer-events:none}
+.scan{position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(108,47,255,.011) 3px,rgba(108,47,255,.011) 4px)}
+/* vignette for cinematic depth */
+.vgn{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,8,.55) 100%)}
+
+/* ══ INTRO ══ */
+#intro{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .7s ease,transform .7s ease}
+#intro.exit{opacity:0;transform:scale(10);pointer-events:none}
+.iparts{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fpt{position:absolute;border-radius:50%;pointer-events:none;animation:fpf linear infinite}
+@keyframes fpf{0%{transform:translateY(100vh) rotate(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-10vh) rotate(720deg);opacity:0}}
+.ictr{position:relative;display:flex;flex-direction:column;align-items:center;z-index:5}
+.wh{position:relative;width:230px;height:230px;display:flex;align-items:center;justify-content:center;margin-bottom:1.7rem;cursor:pointer}
+.whr{position:absolute;border-radius:50%;animation:ws linear infinite;border-style:solid}
+.whr:nth-child(1){width:230px;height:230px;border-width:1px;border-color:rgba(155,89,255,.28) transparent rgba(0,255,136,.28) transparent;animation-duration:9s}
+.whr:nth-child(2){width:195px;height:195px;border-width:1px;border-color:rgba(0,212,255,.34) transparent rgba(155,89,255,.34) transparent;animation-duration:6s;animation-direction:reverse}
+.whr:nth-child(3){width:162px;height:162px;border-width:1.5px;border-color:rgba(0,255,136,.45) transparent rgba(0,212,255,.45) transparent;animation-duration:4s}
+.whr:nth-child(4){width:130px;height:130px;border-width:1px;border-color:rgba(155,89,255,.55) transparent rgba(0,255,136,.55) transparent;animation-duration:3s;animation-direction:reverse}
+@keyframes ws{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.whr::after{content:'';position:absolute;width:6px;height:6px;background:var(--g);border-radius:50%;top:-3px;left:50%;transform:translateX(-50%);box-shadow:0 0 10px var(--g),0 0 20px var(--g)}
+.whc{position:relative;z-index:5;width:92px;height:92px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(108,47,255,.72) 0%,rgba(0,212,255,.25) 45%,transparent 70%);display:flex;align-items:center;justify-content:center;animation:cp 2.2s ease-in-out infinite;cursor:pointer}
+@keyframes cp{0%,100%{box-shadow:0 0 24px rgba(108,47,255,.55),0 0 60px rgba(0,212,255,.18),inset 0 0 24px rgba(0,255,136,.12)}50%{box-shadow:0 0 48px rgba(108,47,255,.95),0 0 110px rgba(0,212,255,.4),inset 0 0 42px rgba(0,255,136,.22)}}
+.whtun{position:absolute;inset:0;border-radius:50%}
+.whtun.go{animation:ts .75s ease-in forwards}
+@keyframes ts{0%{background:radial-gradient(ellipse at center,rgba(108,47,255,0) 0%,rgba(108,47,255,.08) 50%,transparent 100%);transform:scale(1)}55%{background:radial-gradient(ellipse at center,rgba(108,47,255,.92) 0%,rgba(0,212,255,.45) 40%,rgba(0,0,8,.94) 100%);transform:scale(1.6)}100%{background:radial-gradient(ellipse at center,#fff 0%,rgba(108,47,255,1) 25%,rgba(0,0,8,1) 100%);transform:scale(22)}}
+/* energy sparks orbiting wormhole */
+.whspk{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--cy);box-shadow:0 0 8px var(--cy);pointer-events:none;animation:orbspk linear infinite}
+@keyframes orbspk{from{transform:rotate(0deg) translateX(115px) rotate(0deg)}to{transform:rotate(360deg) translateX(115px) rotate(-360deg)}}
+.itl{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:clamp(2.1rem,7.5vw,3.1rem);font-weight:900;letter-spacing:.25em;text-align:center;line-height:1;background:linear-gradient(135deg,var(--g) 0%,var(--cy) 35%,var(--vi) 65%,var(--g) 100%);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shm 4s linear infinite,fu .8s .2s both;filter:drop-shadow(0 0 26px rgba(0,255,136,.35))}
+@keyframes shm{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.isub{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:.7rem;letter-spacing:.4em;color:rgba(155,89,255,.58);margin-top:.45rem;text-align:center;animation:fu .8s .4s both}
+.itag{font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:clamp(.88rem,2.7vw,1.02rem);font-weight:300;color:rgba(232,240,255,.5);text-align:center;margin-top:.4rem;animation:fu .8s .6s both;direction:rtl}
+.itag em{color:var(--g);font-style:normal;font-weight:600}
+.itag strong{color:var(--vi);font-weight:600}
+.enb{margin-top:2.2rem;position:relative;display:inline-flex;align-items:center;gap:.7rem;padding:.9rem 2.3rem;border:1px solid rgba(0,255,136,.45);background:rgba(0,255,136,.06);color:var(--g);font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.68rem;font-weight:700;letter-spacing:.22em;cursor:pointer;overflow:hidden;animation:fu .8s .9s both,bg 3s 2s ease-in-out infinite;transition:all .25s}
+@keyframes bg{0%,100%{box-shadow:0 0 10px rgba(0,255,136,.22)}50%{box-shadow:0 0 34px rgba(0,255,136,.55),0 0 70px rgba(0,255,136,.22)}}
+.enb::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,136,.15),transparent);transform:translateX(-100%);transition:transform .5s}
+.enb:hover::before{transform:translateX(100%)}
+.enb:active{transform:scale(.96)}
+.ear{animation:ab .8s ease-in-out infinite alternate}
+@keyframes ab{from{transform:translateX(0)}to{transform:translateX(5px)}}
+
+/* ══ APP ══ */
+#app{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .55s ease}
+#app.on{opacity:1;pointer-events:all}
+
+/* TOPBAR */
+.tb{
+  flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+  padding:0 1rem;height:54px;
+  background:linear-gradient(180deg,rgba(8,2,40,.97),rgba(4,0,28,.95));
+  backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--bd);
+  box-shadow:0 2px 28px rgba(108,47,255,.22);
+  position:relative;
+}
+.tb::after{
+  content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g) 25%,var(--cy) 50%,var(--vi) 75%,transparent);
+  opacity:.55;
+}
+.brand{display:flex;align-items:center;gap:8px}
+.wico{width:30px;height:30px;flex-shrink:0;filter:drop-shadow(0 0 8px var(--pu))}
+.bn{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.86rem;font-weight:900;letter-spacing:.2em;background:linear-gradient(135deg,var(--g),var(--cy),var(--vi));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.bv{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:7.5px;letter-spacing:2.2px;color:rgba(155,89,255,.55);margin-top:1px;font-weight:700}
+.tbr{display:flex;align-items:center;gap:9px}
+.lp{display:flex;align-items:center;gap:5px;padding:4px 9px;border:1px solid rgba(0,255,136,.32);background:rgba(0,255,136,.06);border-radius:8px;font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8.5px;letter-spacing:1.6px;color:var(--g);font-weight:700}
+.ld{width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 10px var(--g);animation:ld 1.5s infinite}
+@keyframes ld{0%,100%{opacity:1}50%{opacity:.3}}
+.clk{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.85rem;font-weight:700;color:var(--g);letter-spacing:2.2px;text-shadow:0 0 16px rgba(0,255,136,.6)}
+
+/* TABS */
+.tabs{
+  flex-shrink:0;display:flex;
+  border-bottom:1px solid var(--bd);
+  background:linear-gradient(180deg,rgba(4,0,28,.95),rgba(2,0,18,.98));
+  position:relative;
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:9px 3px;
+  font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;
+  font-size:8px;letter-spacing:1.4px;font-weight:700;
+  color:rgba(155,89,255,.42);
+  cursor:pointer;transition:all .25s;
+  border-bottom:2px solid transparent;
+  text-transform:uppercase;
+  position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.tab .tic{transition:transform .3s, filter .3s;font-size:15px;line-height:1}
+.tab:hover{color:var(--vi)}
+.tab.on{
+  color:#fff;
+  border-bottom-color:var(--vi);
+  background:linear-gradient(180deg,rgba(155,89,255,.18) 0%,rgba(155,89,255,.04) 100%);
+}
+.tab.on .tic{transform:scale(1.15);filter:drop-shadow(0 0 8px var(--vi))}
+.tab.on::after{
+  content:'';position:absolute;left:25%;right:25%;bottom:-1px;height:2px;
+  background:var(--vi);box-shadow:0 0 12px var(--vi);
+  border-radius:2px 2px 0 0;
+}
+.tic{font-size:15px;line-height:1}
+
+/* PAGES */
+.pages{flex:1;position:relative;overflow:hidden}
+.pg{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:.9rem;padding-bottom:calc(.9rem + var(--safe));opacity:0;pointer-events:none;transform:translateY(7px);transition:opacity .2s,transform .2s}
+.pg::-webkit-scrollbar{display:none}
+.pg.on{opacity:1;pointer-events:all;transform:none}
+
+/* ════════════════════════════════════════════════════
+   CAPTURE BAR — v7.1 Galactic (compact, dramatic, RTL)
+   ════════════════════════════════════════════════════ */
+.capbar{
+  flex-shrink:0;
+  position:relative;
+  padding:10px 12px calc(12px + var(--safe));
+  background:linear-gradient(180deg, rgba(4,0,30,.85) 0%, rgba(2,0,18,.98) 60%, rgba(0,0,8,1) 100%);
+  border-top:1px solid var(--bd);
+  box-shadow:0 -10px 36px rgba(108,47,255,.22), 0 -1px 0 rgba(155,89,255,.4);
+}
+.capbar::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--g) 20%, var(--cy) 50%, var(--vi) 80%, transparent);
+  opacity:.55;
+  animation:capshim 6s linear infinite;
+  background-size:200% 100%;
+}
+@keyframes capshim{0%{background-position:0% 0}100%{background-position:200% 0}}
+
+/* Action drawer — hidden by default, slides up when + is tapped */
+.cap-actions{
+  display:flex;justify-content:space-around;align-items:center;
+  gap:6px;
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  transition:max-height .32s cubic-bezier(.6,-0.05,.3,1.4), opacity .22s, margin .28s;
+  margin:0;
+}
+.cap-actions.show{
+  max-height:74px; opacity:1; margin:0 0 10px 0;
+}
+.cap-act{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 4px;
+  background:linear-gradient(135deg, rgba(155,89,255,.08), rgba(0,212,255,.04));
+  border:1px solid rgba(155,89,255,.22);
+  border-radius:12px;
+  color:var(--wh);
+  font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;
+  cursor:pointer;
+  transition:transform .15s, background .18s, border-color .18s, box-shadow .18s;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+  overflow:hidden;
+  animation:capActIn .35s cubic-bezier(.5,1.7,.4,1) both;
+}
+@keyframes capActIn{from{opacity:0;transform:translateY(8px) scale(.92)}to{opacity:1;transform:none}}
+.cap-actions.show .cap-act:nth-child(1){animation-delay:0s}
+.cap-actions.show .cap-act:nth-child(2){animation-delay:.04s}
+.cap-actions.show .cap-act:nth-child(3){animation-delay:.08s}
+.cap-actions.show .cap-act:nth-child(4){animation-delay:.12s}
+.cap-act:active{transform:scale(.92)}
+.cap-act .ico{font-size:18px;line-height:1;filter:drop-shadow(0 0 8px currentColor)}
+.cap-act .lbl{font-size:8px;letter-spacing:1.5px;color:rgba(232,240,255,.5);font-weight:600}
+.cap-act.img{border-color:rgba(0,212,255,.32);background:linear-gradient(135deg,rgba(0,212,255,.1),rgba(0,212,255,.02))}
+.cap-act.img:active{box-shadow:inset 0 0 16px rgba(0,212,255,.3)}
+.cap-act.mic{border-color:rgba(0,255,136,.32);background:linear-gradient(135deg,rgba(0,255,136,.1),rgba(0,255,136,.02))}
+.cap-act.mic:active{box-shadow:inset 0 0 16px rgba(0,255,136,.3)}
+.cap-act.mic.rec{
+  background:linear-gradient(135deg,rgba(255,68,102,.22),rgba(255,68,102,.06));
+  border-color:var(--re);
+  animation:capRec 1s ease-in-out infinite;
+}
+@keyframes capRec{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,68,102,.55), inset 0 0 16px rgba(255,68,102,.18)}
+  50%{box-shadow:0 0 0 10px rgba(255,68,102,0), inset 0 0 24px rgba(255,68,102,.35)}
+}
+.cap-act.doc{border-color:rgba(255,183,0,.28);background:linear-gradient(135deg,rgba(255,183,0,.08),rgba(255,183,0,.02))}
+.cap-act.doc:active{box-shadow:inset 0 0 16px rgba(255,183,0,.25)}
+.cap-act.ai{
+  border-color:rgba(192,132,252,.45);
+  background:linear-gradient(135deg,rgba(192,132,252,.16),rgba(155,89,255,.06));
+  position:relative;
+}
+.cap-act.ai::before{
+  content:'';position:absolute;inset:-1px;border-radius:12px;
+  background:conic-gradient(from 0deg, transparent 0deg, var(--vi) 90deg, transparent 120deg, transparent 240deg, var(--g) 270deg, transparent 300deg);
+  opacity:.45;animation:rotate 4s linear infinite;
+  -webkit-mask:linear-gradient(#000,#000) content-box, linear-gradient(#000,#000);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  padding:1px;pointer-events:none;
+}
+@keyframes rotate{to{transform:rotate(360deg)}}
+.cap-act.ai:active{box-shadow:inset 0 0 22px rgba(192,132,252,.45)}
+
+/* Main bar */
+.cap-main{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(8,2,40,.55);
+  border:1px solid rgba(155,89,255,.28);
+  border-radius:14px;
+  padding:5px;
+  backdrop-filter:blur(10px);
+  box-shadow:inset 0 0 16px rgba(108,47,255,.1), 0 4px 24px rgba(0,0,0,.4);
+  transition:border-color .2s, box-shadow .2s;
+}
+.cap-main:focus-within{
+  border-color:var(--vi);
+  box-shadow:inset 0 0 22px rgba(155,89,255,.18), 0 6px 30px rgba(155,89,255,.25), 0 0 0 1px rgba(192,132,252,.35);
+}
+.cap-plus{
+  flex-shrink:0;width:38px;height:38px;
+  background:linear-gradient(135deg, rgba(155,89,255,.18), rgba(0,212,255,.1));
+  border:1px solid rgba(155,89,255,.4);
+  border-radius:10px;
+  color:var(--vi);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:transform .25s cubic-bezier(.5,1.7,.4,1), background .18s, border-color .18s;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  position:relative;
+}
+.cap-plus-i{
+  font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;
+  font-size:22px;font-weight:300;line-height:1;
+  transition:transform .3s cubic-bezier(.5,1.7,.4,1);
+  display:block;
+}
+.cap-plus.open{
+  background:linear-gradient(135deg, rgba(192,132,252,.3), rgba(155,89,255,.18));
+  border-color:var(--vi);
+  box-shadow:0 0 18px rgba(155,89,255,.45);
+}
+.cap-plus.open .cap-plus-i{transform:rotate(135deg)}
+.cap-plus:active{transform:scale(.88)}
+.cap-in{
+  flex:1;min-width:0;
+  background:transparent;
+  border:none;
+  color:var(--wh);
+  font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;
+  font-size:15px;font-weight:500;
+  padding:10px 12px;
+  outline:none;
+  direction:rtl;
+  min-height:38px;
+  line-height:1.3;
+}
+.cap-in::placeholder{color:rgba(192,132,252,.42);font-size:14px;font-weight:400}
+.cap-fire{
+  flex-shrink:0;width:46px;height:38px;
+  background:linear-gradient(135deg,rgba(155,89,255,.4),rgba(108,47,255,.55));
+  border:1px solid rgba(155,89,255,.7);
+  border-radius:10px;
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:all .18s;
+  box-shadow:0 0 14px rgba(155,89,255,.35), inset 0 1px 0 rgba(255,255,255,.18);
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  position:relative;overflow:hidden;
+}
+.cap-fire::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);
+  transform:translateX(-100%);
+  transition:transform .55s;
+}
+.cap-fire:hover::before{transform:translateX(100%)}
+.cap-fire:active{transform:scale(.92);box-shadow:0 0 22px rgba(155,89,255,.6)}
+.cap-fire.loading svg{animation:fireSpin 1s linear infinite;opacity:.5}
+@keyframes fireSpin{to{transform:rotate(360deg)}}
+.cap-fire svg{transform:scaleX(-1)} /* point arrow toward right edge in RTL */
+
+.hi{display:none}
+
+/* Legacy keyframe still used by AI panel mic */
+@keyframes recpul{0%,100%{box-shadow:0 0 0 0 rgba(255,68,102,.6)}50%{box-shadow:0 0 0 8px rgba(255,68,102,0)}}
+
+/* AI panel attachment chip */
+.ai-attach-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 9px 4px 7px;
+  background:linear-gradient(135deg,rgba(0,212,255,.16),rgba(155,89,255,.08));
+  border:1px solid rgba(0,212,255,.45);
+  border-radius:8px;
+  font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;
+  font-size:10px;color:var(--cy);
+  margin-inline-end:4px;
+  flex-shrink:0;
+  max-width:42%;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ai-attach-chip .x{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;
+  background:rgba(255,68,102,.15);color:var(--re);
+  font-size:11px;cursor:pointer;
+  margin-inline-start:3px;
+}
+
+/* ══ SHARED ══ */
+.sttl{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.62rem;font-weight:700;letter-spacing:.22em;color:var(--vi);text-transform:uppercase;margin-bottom:.85rem;padding-bottom:.5rem;border-bottom:1px solid rgba(155,89,255,.16);display:flex;align-items:center;gap:7px}
+.sttl::before{content:'';width:3px;height:13px;background:linear-gradient(180deg,var(--g),var(--cy),var(--vi));border-radius:2px;flex-shrink:0;box-shadow:0 0 8px var(--vi)}
+.card{
+  background:linear-gradient(135deg, rgba(8,2,40,.78) 0%, rgba(4,0,28,.92) 100%);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  padding:1rem;
+  margin-bottom:.8rem;
+  position:relative;
+  overflow:hidden;
+  backdrop-filter:blur(8px);
+  box-shadow:0 4px 22px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(155,89,255,.55),rgba(0,255,136,.4),transparent)}
+.card::after{content:'';position:absolute;bottom:0;left:0;width:40%;height:1px;background:linear-gradient(90deg,var(--g),transparent);opacity:.45}
+
+/* TOAST */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:200;background:rgba(6,0,36,.97);border:1px solid var(--pu);border-radius:10px;padding:9px 18px;font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:11px;color:var(--vi);letter-spacing:1.2px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 6px 28px rgba(108,47,255,.35)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--g);color:var(--g);box-shadow:0 6px 28px rgba(0,255,136,.35)}
+.toast.err{border-color:var(--re);color:var(--re);box-shadow:0 6px 28px rgba(255,68,102,.35)}
+
+/* ══ PAGE 0 — RADAR (WAR ROOM) ══ */
+.srow{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:1rem}
+.sbox{
+  background:linear-gradient(160deg, rgba(8,2,40,.7) 0%, rgba(4,0,28,.92) 100%);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  padding:14px 8px 12px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  backdrop-filter:blur(8px);
+  transition:transform .25s, box-shadow .25s, border-color .25s;
+}
+.sbox:hover{transform:translateY(-2px);border-color:rgba(192,132,252,.45);box-shadow:0 8px 26px rgba(108,47,255,.35)}
+.sbox::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,currentColor,transparent);opacity:.4}
+.sbox::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--vi),transparent);opacity:.32}
+.sv{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:1.65rem;font-weight:800;line-height:1;margin-bottom:5px;letter-spacing:-.02em}
+.sv.r{color:var(--re);text-shadow:0 0 22px rgba(255,68,102,.6),0 0 4px rgba(255,68,102,.9)}
+.sv.g{color:var(--g);text-shadow:0 0 22px rgba(0,255,136,.6),0 0 4px rgba(0,255,136,.9)}
+.sv.p{color:var(--vi);text-shadow:0 0 22px rgba(192,132,252,.6),0 0 4px rgba(192,132,252,.9)}
+.sl{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;letter-spacing:2px;color:rgba(232,240,255,.4);font-weight:600}
+
+/* Radar wrapper — glass dome effect */
+.rw{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1rem;
+  padding:14px;
+  background:radial-gradient(ellipse at center, rgba(8,4,40,.65) 0%, rgba(4,0,22,.85) 70%, transparent 100%);
+  border:1px solid rgba(155,89,255,.25);
+  border-radius:50%;
+  aspect-ratio:1;
+  max-width:330px;
+  margin-left:auto;margin-right:auto;
+  overflow:hidden;
+  box-shadow:
+    inset 0 0 50px rgba(108,47,255,.18),
+    inset 0 0 100px rgba(0,255,136,.04),
+    0 0 30px rgba(108,47,255,.18);
+}
+.rw::before{
+  content:'';position:absolute;inset:-30px;
+  background:radial-gradient(ellipse at center,rgba(108,47,255,.18) 0%,rgba(0,255,136,.06) 35%,transparent 75%);
+  pointer-events:none;animation:rwgl 4s ease-in-out infinite;
+}
+.rw::after{
+  /* Subtle scanline overlay on the radar dome */
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(0,255,136,.025) 4px, rgba(0,255,136,.025) 5px);
+  pointer-events:none;
+}
+@keyframes rwgl{0%,100%{opacity:.8}50%{opacity:1}}
+#radar{display:block;max-width:100%;height:auto;filter:drop-shadow(0 0 22px rgba(0,255,136,.28)) drop-shadow(0 0 38px rgba(108,47,255,.25))}
+
+/* BLIP TOOLTIP */
+.btt{position:fixed;z-index:999;background:rgba(4,0,30,.97);border:1px solid var(--pu);border-radius:10px;padding:10px 13px;min-width:160px;max-width:240px;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s;box-shadow:0 8px 32px rgba(108,47,255,.5)}
+.btt.show{opacity:1;transform:none}
+.bt-ty{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;letter-spacing:2.2px;color:rgba(155,89,255,.7);margin-bottom:4px;font-weight:700}
+.bt-tx{font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:13px;font-weight:500;color:rgba(232,240,255,.95);direction:rtl;text-align:right;line-height:1.4}
+.bt-pr{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;margin-top:6px;letter-spacing:1.5px}
+
+/* AI CARD + CHAT */
+.aic{
+  background:linear-gradient(135deg,rgba(8,2,40,.85) 0%,rgba(4,0,28,.95) 100%);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  padding:.85rem;
+  display:flex;gap:11px;
+  margin-bottom:1rem;
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+.aic::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g),var(--cy),var(--vi),transparent);animation:aicsh 4s linear infinite;background-size:200% 100%}
+@keyframes aicsh{0%{background-position:0% 0}100%{background-position:200% 0}}
+.aiw{
+  width:34px;height:34px;flex-shrink:0;
+  border:1px solid rgba(155,89,255,.5);
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle, rgba(155,89,255,.18) 0%, rgba(155,89,255,.04) 100%);
+  font-size:15px;
+  border-radius:10px;
+  animation:wp 3s ease-in-out infinite;
+}
+@keyframes wp{0%,100%{box-shadow:0 0 8px rgba(155,89,255,.4)}50%{box-shadow:0 0 22px rgba(155,89,255,.85),0 0 40px rgba(0,255,136,.18)}}
+.ait{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:7.5px;letter-spacing:2.6px;color:rgba(155,89,255,.6);margin-bottom:4px;font-weight:700}
+.aim{font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:13px;font-weight:400;color:rgba(232,240,255,.78);line-height:1.55;direction:rtl;text-align:right;min-height:36px;transition:opacity .28s}
+.aim em{color:var(--g);font-style:normal;font-weight:600}
+.aim strong{color:var(--vi);font-weight:600}
+.aim .typing::after{content:'|';animation:bc .6s infinite}
+@keyframes bc{0%,100%{opacity:1}50%{opacity:0}}
+
+/* AI CHAT OPEN BUTTON */
+.aibtn{
+  width:100%;
+  background:linear-gradient(135deg,rgba(155,89,255,.16),rgba(0,212,255,.1));
+  border:1px solid rgba(155,89,255,.4);
+  border-radius:12px;
+  color:var(--vi);
+  font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;
+  font-size:.66rem;font-weight:700;letter-spacing:.16em;
+  padding:13px;
+  cursor:pointer;
+  transition:all .25s;
+  margin-bottom:1rem;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  position:relative;overflow:hidden;
+  box-shadow:0 4px 18px rgba(108,47,255,.18);
+}
+.aibtn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(155,89,255,.18),transparent);transform:translateX(-100%);transition:transform .6s}
+.aibtn:hover::before{transform:translateX(100%)}
+.aibtn:hover{border-color:var(--vi);box-shadow:0 6px 24px rgba(155,89,255,.4)}
+.aibtn:active{transform:scale(.98);background:rgba(155,89,255,.22)}
+
+/* AI CHAT PANEL */
+.aipanel{position:fixed;inset:0;z-index:180;background:rgba(0,0,8,.94);backdrop-filter:blur(22px);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s}
+.aipanel.show{opacity:1;pointer-events:all}
+.aih{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bd);background:linear-gradient(180deg,rgba(8,2,40,.95),rgba(4,0,28,.95))}
+.aihb{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.78rem;font-weight:900;letter-spacing:.22em;background:linear-gradient(135deg,var(--g),var(--cy),var(--vi));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.aihx{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(255,68,102,.1);border:1px solid rgba(255,68,102,.35);border-radius:10px;color:var(--re);cursor:pointer;font-size:15px;transition:all .15s}
+.aihx:active{background:rgba(255,68,102,.25);transform:scale(.92)}
+.ailog{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:11px}
+.ailog::-webkit-scrollbar{width:3px}
+.ailog::-webkit-scrollbar-thumb{background:rgba(155,89,255,.35);border-radius:2px}
+.aimsg{max-width:82%;padding:11px 14px;border-radius:13px;font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:13.5px;line-height:1.6;direction:rtl;text-align:right;animation:aimsgIn .28s ease;backdrop-filter:blur(6px)}
+@keyframes aimsgIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.aimsg.u{align-self:flex-start;background:linear-gradient(135deg,rgba(0,212,255,.14),rgba(0,212,255,.05));border:1px solid rgba(0,212,255,.32);color:var(--wh);border-bottom-left-radius:4px}
+.aimsg.b{align-self:flex-end;background:linear-gradient(135deg,rgba(155,89,255,.16),rgba(108,47,255,.08));border:1px solid rgba(155,89,255,.38);color:var(--wh);border-bottom-right-radius:4px;box-shadow:0 4px 14px rgba(108,47,255,.18)}
+.aimsg.b strong{color:var(--g);font-weight:600}
+.aimsg.b em{color:var(--vi);font-style:normal;font-weight:600}
+.aimsg .mtag{display:inline-block;font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;padding:2px 6px;border:1px solid currentColor;border-radius:4px;margin-inline-end:5px;letter-spacing:1.3px;opacity:.8;font-weight:700}
+.aityp{align-self:flex-end;display:inline-flex;gap:5px;padding:11px 14px;background:rgba(155,89,255,.1);border:1px solid rgba(155,89,255,.3);border-radius:13px}
+.aityp span{width:6px;height:6px;border-radius:50%;background:var(--vi);animation:typB 1.2s infinite}
+.aityp span:nth-child(2){animation-delay:.2s}
+.aityp span:nth-child(3){animation-delay:.4s}
+@keyframes typB{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+.aiibar{flex-shrink:0;display:flex;gap:6px;align-items:center;padding:12px 16px;padding-bottom:calc(12px + var(--safe));background:linear-gradient(180deg,rgba(4,0,30,.4),rgba(4,0,30,.98));border-top:1px solid var(--bd)}
+.aii{flex:1;background:rgba(155,89,255,.08);border:1px solid rgba(155,89,255,.3);border-radius:10px;color:var(--wh);font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:13.5px;padding:11px 13px;outline:none;direction:rtl;min-width:0;transition:all .18s}
+.aii:focus{border-color:var(--vi);background:rgba(155,89,255,.13);box-shadow:0 0 0 2px rgba(155,89,255,.16)}
+.aii::placeholder{color:rgba(155,89,255,.4);font-size:12.5px}
+.aisb{padding:10px 16px;background:linear-gradient(135deg,rgba(0,255,136,.18),rgba(0,255,136,.05));border:1px solid rgba(0,255,136,.45);border-radius:10px;color:var(--g);font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.66rem;font-weight:700;letter-spacing:1.3px;cursor:pointer;flex-shrink:0;transition:all .15s;box-shadow:0 0 12px rgba(0,255,136,.25)}
+.aisb:active{transform:scale(.94);box-shadow:0 0 18px rgba(0,255,136,.5)}
+.aimic{width:42px;height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.32);border-radius:10px;cursor:pointer;font-size:16px;color:var(--cy);transition:all .15s}
+.aimic:active{transform:scale(.92)}
+.aimic.rec{background:rgba(255,68,102,.22);border-color:var(--re);color:var(--re);animation:recpul 1s infinite}
+.aiatt{width:42px;height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(155,89,255,.08);border:1px solid rgba(155,89,255,.28);border-radius:10px;cursor:pointer;font-size:15px;color:var(--vi);transition:all .15s}
+.aiatt:active{transform:scale(.92)}
+.aipv{align-self:flex-start;display:flex;gap:6px;align-items:center;padding:6px 10px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.25);border-radius:6px;font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:9px;color:var(--cy);max-width:82%}
+.aipv img{max-width:120px;max-height:80px;border-radius:6px}
+
+/* ══ PAGE 1 — MISSIONS ══ */
+.frow{display:flex;gap:6px;margin-bottom:1rem;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.frow::-webkit-scrollbar{display:none}
+.fp{
+  padding:6px 12px;flex-shrink:0;
+  font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;
+  font-size:9px;letter-spacing:1.4px;font-weight:700;
+  border:1px solid rgba(155,89,255,.25);
+  color:rgba(155,89,255,.55);
+  cursor:pointer;transition:all .2s;
+  border-radius:8px;white-space:nowrap;
+  background:rgba(8,2,40,.4);
+  -webkit-tap-highlight-color:transparent;
+}
+.fp:hover{border-color:rgba(192,132,252,.45);color:var(--vi)}
+.fp.on{
+  border-color:var(--vi);color:#fff;
+  background:linear-gradient(135deg, rgba(155,89,255,.28), rgba(192,132,252,.12));
+  box-shadow:0 0 14px rgba(155,89,255,.4), inset 0 0 12px rgba(192,132,252,.18);
+}
+.msn{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:11px 12px;
+  margin-bottom:6px;
+  background:linear-gradient(135deg,rgba(8,2,40,.55),rgba(4,0,28,.7));
+  border:1px solid rgba(155,89,255,.12);
+  border-radius:10px;
+  position:relative;
+  animation:si .26s both;
+  cursor:pointer;
+  transition:all .18s;
+  overflow:hidden;
+}
+@keyframes si{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.msn:hover{background:linear-gradient(135deg,rgba(12,4,52,.7),rgba(8,2,38,.85));border-color:rgba(192,132,252,.32);transform:translateX(-2px)}
+.msn.done{opacity:.36}
+.msn.done .mt{text-decoration:line-through}
+.msn::after{content:'';position:absolute;right:0;top:0;bottom:0;width:0;background:linear-gradient(180deg,var(--vi),var(--cy));transition:width .2s;border-radius:10px 0 0 10px}
+.msn:hover::after{width:3px;box-shadow:0 0 10px var(--vi)}
+.mp{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.ph{background:var(--re);box-shadow:0 0 12px var(--re);animation:ld 2s infinite}
+.pn{background:var(--am);box-shadow:0 0 8px rgba(255,183,0,.65)}
+.pl{background:rgba(0,255,136,.7);box-shadow:0 0 8px rgba(0,255,136,.4)}
+@keyframes ld{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.65;transform:scale(1.2)}}
+.mb2{flex:1;min-width:0}
+.mt{font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:13.5px;font-weight:500;color:rgba(232,240,255,.95);line-height:1.4;direction:rtl;text-align:right}
+.mf{display:flex;gap:5px;margin-top:6px;justify-content:flex-end;flex-wrap:wrap}
+.mty{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;letter-spacing:1.2px;font-weight:700;padding:2px 7px;border:1px solid;border-radius:5px;background:rgba(8,2,40,.6)}
+.mtg{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;letter-spacing:1.2px;padding:2px 7px;border:1px solid rgba(155,89,255,.22);color:rgba(155,89,255,.55);border-radius:5px}
+.mck{
+  width:30px;height:30px;min-width:30px;
+  border:1.5px solid rgba(155,89,255,.5);
+  background:rgba(155,89,255,.05);
+  cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:transparent;font-size:14px;font-weight:700;
+  transition:all .18s;border-radius:8px;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;
+}
+.mck:hover{border-color:var(--g);background:rgba(0,255,136,.08)}
+.mck:active{transform:scale(.84);background:rgba(0,255,136,.22);border-color:var(--g)}
+.msn.done .mck{border-color:var(--g);background:rgba(0,255,136,.22);color:var(--g);box-shadow:0 0 10px rgba(0,255,136,.4)}
+
+/* ══ PAGE 2 — VAULT ══ */
+.vs{width:100%;background:rgba(155,89,255,.05);border:1px solid rgba(155,89,255,.22);border-radius:3px;color:var(--wh);font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:10.5px;padding:8px 11px;outline:none;direction:rtl;letter-spacing:.5px;margin-bottom:.85rem;transition:all .2s}
+.vs::placeholder{color:rgba(155,89,255,.28)}
+.vs:focus{border-color:var(--pu);background:rgba(155,89,255,.09)}
+.vg{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:.9rem}
+.vc{background:rgba(6,0,36,.88);border:1px solid var(--bd);border-radius:4px;padding:11px 9px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.vc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--pu),transparent);opacity:.45}
+.vc:active{transform:scale(.96);background:rgba(155,89,255,.1)}
+.vci{font-size:18px;margin-bottom:5px;display:block}
+.vcl{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.55rem;font-weight:700;letter-spacing:.1em;color:var(--vi);display:block;margin-bottom:2px}
+.vcn{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:.88rem;font-weight:700;color:var(--wh)}
+.vcs{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:7px;letter-spacing:1px;color:rgba(232,240,255,.25)}
+.vi{padding:8px 0;border-bottom:1px solid rgba(155,89,255,.07);cursor:pointer;transition:all .12s}
+.vi:active{padding-right:5px}
+.vit{font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:12px;font-weight:500;color:rgba(232,240,255,.8);direction:rtl;text-align:right;line-height:1.3;margin-bottom:3px}
+.vim{display:flex;gap:4px;justify-content:flex-end}
+.vid{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:7px;letter-spacing:1px;color:rgba(155,89,255,.38)}
+
+/* ══ PAGE 3 — INTEL ══ */
+.rcard{background:rgba(6,0,36,.88);border:1px solid rgba(255,183,0,.25);border-radius:4px;padding:.9rem;margin-bottom:.7rem;position:relative;overflow:hidden}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--am),transparent)}
+.rtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.rbg{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.6rem;font-weight:700;letter-spacing:.14em;padding:4px 9px;border:1px solid var(--am);color:var(--am);background:rgba(255,183,0,.06);text-shadow:0 0 10px rgba(255,183,0,.55)}
+.xpt{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:9px;color:var(--vi);letter-spacing:1.5px}
+.xpb{width:100%;height:6px;background:rgba(155,89,255,.08);border-radius:3px;overflow:hidden;position:relative}
+.xpf{height:100%;background:linear-gradient(90deg,var(--g),var(--cy),var(--vi));border-radius:3px;transition:width 1.5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 10px rgba(0,255,136,.5);position:relative}
+.xpf::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:xpsh 2s linear infinite}
+@keyframes xpsh{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.xpl{display:flex;justify-content:space-between;font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;color:rgba(232,240,255,.3);margin-top:6px;letter-spacing:1.5px}
+.skr{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:.7rem}
+.skb{background:rgba(6,0,36,.85);border:1px solid var(--bd);border-radius:4px;padding:9px 8px;text-align:center;position:relative;overflow:hidden}
+.skb::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--pu),transparent);opacity:.4}
+.skn{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:1.2rem;font-weight:700;color:var(--g);text-shadow:0 0 15px rgba(0,255,136,.5)}
+.skl{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:7.5px;letter-spacing:1.5px;color:rgba(232,240,255,.35);margin-top:3px}
+.bkd{display:flex;align-items:center;gap:7px;padding:5px 0}
+.bkc{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bkl{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:9px;letter-spacing:1px;color:rgba(232,240,255,.6);flex:1}
+.bkv{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:9px;color:var(--vi);font-weight:700}
+.ll{max-height:145px;overflow-y:auto;padding:4px 0}
+.ll::-webkit-scrollbar{width:2px}
+.ll::-webkit-scrollbar-thumb{background:rgba(155,89,255,.25)}
+.lr{display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:1px solid rgba(155,89,255,.05);animation:li .28s ease}
+@keyframes li{from{opacity:0;transform:translateX(4px)}to{opacity:1;transform:none}}
+.lt{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;color:rgba(155,89,255,.35);flex-shrink:0;padding-top:1px}
+.lm{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:9px;color:rgba(232,240,255,.4);line-height:1.4;direction:rtl;text-align:right}
+
+/* ══ PAGE 4 — OPS ══ */
+.ucrd{background:rgba(6,0,36,.92);border:1px solid var(--bd);border-radius:4px;padding:.9rem;margin-bottom:.7rem;display:flex;align-items:center;gap:11px;position:relative;overflow:hidden}
+.ucrd::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--pu),var(--g),transparent)}
+.uav{width:52px;height:52px;border-radius:50%;border:1px solid rgba(155,89,255,.45);display:flex;align-items:center;justify-content:center;background:rgba(155,89,255,.09);font-size:22px;box-shadow:0 0 18px rgba(155,89,255,.28);flex-shrink:0;cursor:pointer;overflow:hidden;position:relative}
+.uav img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.uav::after{content:'📷';position:absolute;inset:0;background:rgba(0,0,8,.7);display:none;align-items:center;justify-content:center;font-size:14px;border-radius:50%}
+.uav:hover::after{display:flex}
+.uinfo{flex:1;min-width:0}
+.un{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.78rem;font-weight:700;color:var(--vi)}
+.ur{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:8px;letter-spacing:2px;color:rgba(232,240,255,.32);margin-top:3px}
+.ubio{font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:11px;color:rgba(232,240,255,.55);margin-top:5px;direction:rtl;cursor:pointer;line-height:1.4;padding:3px 5px;border-radius:2px;transition:background .2s;min-height:18px}
+.ubio:hover{background:rgba(155,89,255,.05)}
+.ubio[contenteditable="true"]{background:rgba(155,89,255,.1);outline:1px solid var(--pu);color:var(--wh)}
+.ubio:empty::before{content:'بیو خودت رو بنویس...';color:rgba(155,89,255,.4);font-style:italic}
+.ustat{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
+.ustat .sb{background:rgba(4,0,30,.6);border:1px solid rgba(155,89,255,.15);padding:5px 3px;text-align:center;border-radius:2px}
+.ustat .sv{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.72rem;font-weight:700;color:var(--g)}
+.ustat .sl{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:7px;letter-spacing:1px;color:rgba(232,240,255,.3)}
+
+.opb{width:100%;padding:11px 13px;cursor:pointer;transition:all .18s;background:rgba(6,0,36,.88);border:1px solid var(--bd);border-radius:4px;color:rgba(155,89,255,.62);font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:9.5px;letter-spacing:1.5px;text-align:right;direction:rtl;display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;position:relative;overflow:hidden}
+.opb::before{content:'';position:absolute;right:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,transparent,rgba(155,89,255,.08));transition:width .28s}
+.opb:active::before{width:100%}
+.opb:active{border-color:var(--pu);color:var(--vi)}
+.opb.loading{opacity:.5;cursor:not-allowed}
+.opb.g{border-color:rgba(0,255,136,.18);color:rgba(0,255,136,.52)}
+.opb.g:active{border-color:var(--g);color:var(--g)}
+.opb.a{border-color:rgba(255,183,0,.18);color:rgba(255,183,0,.52)}
+.opb.a:active{border-color:var(--am);color:var(--am)}
+.opa{opacity:.4;font-size:11px}
+.ss{font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:9px;color:rgba(155,89,255,.4);line-height:1.85;direction:ltr;text-align:left}
+.ss .ok{color:var(--g)} .ss .w{color:var(--am)} .ss .er{color:var(--re)}
+
+/* REMINDER/REPORT MODAL */
+.modal{position:fixed;inset:0;z-index:150;background:rgba(0,0,8,.88);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(10px)}
+.modal.show{opacity:1;pointer-events:all}
+.modal-box{width:100%;max-width:480px;max-height:86vh;overflow-y:auto;background:rgba(6,0,36,.98);border:1px solid var(--bd);border-radius:12px 12px 0 0;padding:1.5rem;padding-bottom:calc(1.5rem + var(--safe));transform:translateY(20px);transition:transform .25s}
+.modal.show .modal-box{transform:none}
+.modal-ttl{font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.72rem;font-weight:700;letter-spacing:.2em;color:var(--pu);margin-bottom:1rem}
+.minp{width:100%;background:rgba(155,89,255,.05);border:1px solid rgba(155,89,255,.25);border-radius:3px;color:var(--wh);font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:11px;padding:9px 11px;outline:none;direction:rtl;letter-spacing:.5px;margin-bottom:.6rem;transition:all .2s}
+.minp:focus{border-color:var(--pu);background:rgba(155,89,255,.09)}
+.minp::placeholder{color:rgba(155,89,255,.3);font-size:10px}
+.mrow{display:flex;gap:.5rem;margin-top:.6rem}
+.mok{flex:1;padding:10px;background:rgba(155,89,255,.14);border:1px solid rgba(155,89,255,.4);border-radius:3px;color:var(--vi);font-family:'Orbitron','CosmicFa','Reem Kufi Fun','Courier New',monospace;font-size:.62rem;font-weight:700;cursor:pointer;transition:all .18s}
+.mok:active{background:rgba(155,89,255,.28)}
+.mcn{flex:1;padding:10px;background:transparent;border:1px solid rgba(155,89,255,.2);border-radius:3px;color:rgba(155,89,255,.48);font-family:'Share Tech Mono','BodyFa','Vazirmatn','Courier New',monospace;font-size:.62rem;cursor:pointer;transition:all .18s}
+.mcn:active{border-color:var(--re);color:var(--re)}
+.rpbody{font-family:'Rajdhani','BodyFa','Vazirmatn',Tahoma,'Segoe UI',sans-serif;font-size:13px;color:rgba(232,240,255,.85);line-height:1.7;direction:rtl;text-align:right;white-space:pre-wrap;max-height:50vh;overflow-y:auto;padding:10px;background:rgba(4,0,30,.6);border:1px solid var(--bd);border-radius:3px;margin-bottom:.8rem}
+
+/* DOPAMINE PARTICLES */
+.dpar{position:fixed;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:999;animation:dparB .9s ease-out forwards}
+@keyframes dparB{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+</style>
+</head>
+<body>
+<canvas id="cosmos"></canvas>
+<div class="scan"></div>
+<div class="vgn"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ══ REMINDER MODAL ══ -->
+<div class="modal" id="remModal">
+  <div class="modal-box">
+    <div class="modal-ttl">⏰ یادآور جدید</div>
+    <input class="minp" id="rem-text" placeholder="متن یادآور..." />
+    <input class="minp" id="rem-date" type="datetime-local" style="color:var(--wh);direction:ltr" />
+    <select class="minp" id="rem-prio" style="cursor:pointer">
+      <option value="normal">🟡 اولویت عادی</option>
+      <option value="high">🔴 اولویت بالا</option>
+      <option value="low">🟢 اولویت پایین</option>
+    </select>
+    <div class="mrow">
+      <button class="mok" onclick="submitReminder()">ثبت یادآور ▶</button>
+      <button class="mcn" onclick="closeModal()">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REPORT MODAL ══ -->
+<div class="modal" id="rpModal">
+  <div class="modal-box">
+    <div class="modal-ttl" id="rp-ttl">📊 گزارش</div>
+    <div class="rpbody" id="rp-body">در حال دریافت...</div>
+    <div class="mrow">
+      <button class="mcn" onclick="closeRpModal()" style="flex:1">بستن</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AI CHAT PANEL ══ -->
+<div class="aipanel" id="aipanel">
+  <div class="aih">
+    <div class="aihb">🐺 FENRIR — AI CORE</div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div id="ai-poll-btn" onclick="pollBotMessages()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.25);border-radius:3px;cursor:pointer;font-size:13px;color:var(--g)" title="رفرش پیام‌های بات">🔄</div>
+      <div class="aihx" onclick="closeAI()">✕</div>
+    </div>
+  </div>
+  <div class="ailog" id="ailog"></div>
+  <div class="aiibar">
+    <input type="file" id="aif" class="hi" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt" onchange="aiAttach(this)">
+    <div class="aiatt" onclick="document.getElementById('aif').click()" title="فایل">📎</div>
+    <div class="aimic" id="aim-mic" onclick="aiToggleMic()" title="صدا">🎙</div>
+    <input class="aii" id="aii" placeholder="با فنریر صحبت کن..." onkeydown="if(event.key==='Enter') aiSend()">
+    <button class="aisb" onclick="aiSend()">▶</button>
+  </div>
+</div>
+
+<!-- ══ INTRO ══ -->
+<div id="intro">
+  <div class="iparts" id="iparts"></div>
+  <div class="ictr">
+    <div class="wh" onclick="enter()">
+      <div class="whr"></div><div class="whr"></div><div class="whr"></div><div class="whr"></div>
+      <div class="whspk" style="animation-duration:3.5s"></div>
+      <div class="whspk" style="animation-duration:4.8s;animation-delay:-1s;background:var(--g);box-shadow:0 0 8px var(--g)"></div>
+      <div class="whspk" style="animation-duration:5.5s;animation-delay:-2.5s;background:var(--vi);box-shadow:0 0 8px var(--vi)"></div>
+      <div class="whtun" id="whtun"></div>
+      <div class="whc">
+        <svg width="56" height="56" viewBox="0 0 60 60">
+          <polygon points="30,3 36,10 42,8 39,15 44,21 37,20 35,28 30,24 25,28 23,20 16,21 21,15 18,8 24,10" fill="none" stroke="#9b59ff" stroke-width=".7" opacity=".3"/>
+          <polygon points="19,10 12,1 23,8" fill="#9b59ff" opacity=".95"/>
+          <polygon points="41,10 48,1 37,8" fill="#9b59ff" opacity=".95"/>
+          <polygon points="20.5,9 14,3 22.5,8" fill="#04001e"/><polygon points="39.5,9 46,3 37.5,8" fill="#04001e"/>
+          <path d="M14,12 L10,22 L12,33 L20,41 L30,46 L40,41 L48,33 L50,22 L46,12 L37,8 L23,8 Z" fill="rgba(4,0,30,.96)" stroke="#9b59ff" stroke-width="1"/>
+          <ellipse cx="23" cy="24" rx="5" ry="6" fill="#020012" stroke="#9b59ff" stroke-width=".8"/>
+          <ellipse cx="37" cy="24" rx="5" ry="6" fill="#020012" stroke="#9b59ff" stroke-width=".8"/>
+          <ellipse cx="23" cy="24" rx="2.8" ry="4.2" fill="#9b59ff" opacity=".95"/>
+          <ellipse cx="37" cy="24" rx="2.8" ry="4.2" fill="#9b59ff" opacity=".95"/>
+          <ellipse cx="23" cy="24" rx="5" ry="6" fill="none" stroke="#c084fc" stroke-width=".8"><animate attributeName="opacity" values=".2;.9;.2" dur="2.5s" repeatCount="indefinite"/></ellipse>
+          <ellipse cx="37" cy="24" rx="5" ry="6" fill="none" stroke="#c084fc" stroke-width=".8"><animate attributeName="opacity" values=".2;.9;.2" dur="2.5s" repeatCount="indefinite"/></ellipse>
+          <polygon points="30,34 27,37 33,37" fill="#00ff88"/>
+          <path d="M24,41 L30,44 L36,41" fill="none" stroke="rgba(0,255,136,.5)" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="30,13 32.5,15.5 30,17 27.5,15.5" fill="rgba(0,212,255,.6)" stroke="#00d4ff" stroke-width=".4"/>
+        </svg>
+      </div>
+    </div>
+    <div class="itl">LIFEOPS</div>
+    <div class="isub">PROJECT FENRIR — GALACTIC EDITION</div>
+    <div class="itag">اولین <em>AGI Gamified</em> جهان — تو <strong>فرمانده‌ای</strong></div>
+    <button class="enb" onclick="enter()">ENTER WAR ROOM <span class="ear">→</span></button>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="tb">
+    <div class="brand">
+      <svg class="wico" viewBox="0 0 28 28">
+        <polygon points="8,4 4,0 11,3" fill="#9b59ff"/><polygon points="20,4 24,0 17,3" fill="#9b59ff"/>
+        <path d="M7,8 L5,14 L7,19 L11,23 L14,25 L17,23 L21,19 L23,14 L21,8 L17,5.5 L11,5.5 Z" fill="rgba(4,0,30,.96)" stroke="#9b59ff" stroke-width=".9"/>
+        <ellipse cx="10.5" cy="13" rx="2.8" ry="3.2" fill="#020012" stroke="#9b59ff" stroke-width=".6"/>
+        <ellipse cx="17.5" cy="13" rx="2.8" ry="3.2" fill="#020012" stroke="#9b59ff" stroke-width=".6"/>
+        <ellipse cx="10.5" cy="13" rx="1.6" ry="2.4" fill="#9b59ff" opacity=".9"/>
+        <ellipse cx="17.5" cy="13" rx="1.6" ry="2.4" fill="#9b59ff" opacity=".9"/>
+        <polygon points="14,18 12,20 16,20" fill="#00ff88"/>
+        <polygon points="14,7 15.5,8.5 14,9.5 12.5,8.5" fill="rgba(0,212,255,.5)" stroke="#00d4ff" stroke-width=".3"/>
+      </svg>
+      <div><div class="bn">LIFEOPS</div><div class="bv">GALACTIC · V7</div></div>
+    </div>
+    <div class="tbr">
+      <div class="lp"><div class="ld"></div>LIVE</div>
+      <div class="clk" id="clk">--:--</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" onclick="gt(0,this)"><span class="tic">📡</span>RADAR</div>
+    <div class="tab" onclick="gt(1,this)"><span class="tic">⚡</span>MISSIONS</div>
+    <div class="tab" onclick="gt(2,this)"><span class="tic">🗄️</span>VAULT</div>
+    <div class="tab" onclick="gt(3,this)"><span class="tic">👑</span>INTEL</div>
+    <div class="tab" onclick="gt(4,this)"><span class="tic">⚙️</span>OPS</div>
+  </div>
+
+  <div class="pages">
+    <!-- P0 RADAR -->
+    <div class="pg on" id="p0">
+      <div class="srow">
+        <div class="sbox"><div class="sv r" id="s-hi">–</div><div class="sl">URGENT</div></div>
+        <div class="sbox"><div class="sv g" id="s-do">–</div><div class="sl">DONE TODAY</div></div>
+        <div class="sbox"><div class="sv p" id="s-rm">–</div><div class="sl">REMINDERS</div></div>
+      </div>
+      <div class="rw"><canvas id="radar" width="300" height="300"></canvas></div>
+      <div class="btt" id="btt"><div class="bt-ty" id="bt-ty"></div><div class="bt-tx" id="bt-tx"></div><div class="bt-pr" id="bt-pr"></div></div>
+      <button class="aibtn" onclick="openAI()">💬 گفتگو با فنریر (AI Core) <span style="opacity:.5">→</span></button>
+      <div class="aic">
+        <div class="aiw">🐺</div>
+        <div style="flex:1;min-width:0"><div class="ait">FENRIR_CORE — COGNITIVE ADVISORY</div><div class="aim" id="aim">در حال اتصال به هسته شناختی...</div></div>
+      </div>
+    </div>
+
+    <!-- P1 MISSIONS -->
+    <div class="pg" id="p1">
+      <div class="sttl">⚡ ماموریت‌های فعال</div>
+      <div class="frow">
+        <div class="fp on" onclick="flt('all',this)">ALL</div>
+        <div class="fp" onclick="flt('task',this)">TASK</div>
+        <div class="fp" onclick="flt('reminder',this)">REMINDER</div>
+        <div class="fp" onclick="flt('idea',this)">IDEA</div>
+        <div class="fp" onclick="flt('finance',this)">FINANCE</div>
+        <div class="fp" onclick="flt('health',this)">HEALTH</div>
+        <div class="fp" onclick="flt('event',this)">EVENT</div>
+      </div>
+      <div id="mlist"></div>
+    </div>
+
+    <!-- P2 VAULT -->
+    <div class="pg" id="p2">
+      <div class="sttl">🗄️ Second Brain Vault</div>
+      <input class="vs" id="vs" placeholder="جستجو در حافظه دوم..." oninput="vsrch(this.value)">
+      <div class="vg">
+        <div class="vc" onclick="flt('task',null);gt(1,null)"><span class="vci">⚡</span><span class="vcl">TASKS</span><div class="vcn" id="vt">–</div><div class="vcs">ماموریت‌ها</div></div>
+        <div class="vc" onclick="flt('idea',null);gt(1,null)"><span class="vci">💡</span><span class="vcl">IDEAS</span><div class="vcn" id="vi2">–</div><div class="vcs">ایده‌ها</div></div>
+        <div class="vc" onclick="flt('reminder',null);gt(1,null)"><span class="vci">⏰</span><span class="vcl">REMINDERS</span><div class="vcn" id="vr">–</div><div class="vcs">یادآورها</div></div>
+        <div class="vc" onclick="flt('finance',null);gt(1,null)"><span class="vci">💰</span><span class="vcl">FINANCE</span><div class="vcn" id="vf">–</div><div class="vcs">مالی</div></div>
+        <div class="vc" onclick="flt('health',null);gt(1,null)"><span class="vci">🧬</span><span class="vcl">HEALTH</span><div class="vcn" id="vh">–</div><div class="vcs">سلامت</div></div>
+        <div class="vc" onclick="flt('note',null);gt(1,null)"><span class="vci">📝</span><span class="vcl">NOTES</span><div class="vcn" id="vn">–</div><div class="vcs">یادداشت‌ها</div></div>
+      </div>
+      <div class="sttl">آخرین intel‌ها</div>
+      <div id="vrc"></div>
+    </div>
+
+    <!-- P3 INTEL -->
+    <div class="pg" id="p3">
+      <div class="sttl">👑 Wolf Pack Status</div>
+      <div class="rcard">
+        <div class="rtop"><div class="rbg">SHADOW KING</div><div class="xpt" id="xpt">XP: –/–</div></div>
+        <div class="xpb"><div class="xpf" id="xpf"></div></div>
+        <div class="xpl"><span id="lvl-cur">LVL 1</span><span id="lvl-nxt">→ LVL 2</span></div>
+      </div>
+      <div class="skr">
+        <div class="skb"><div class="skn" id="sk-d">–</div><div class="skl">🔥 DAY STREAK</div></div>
+        <div class="skb"><div class="skn" id="sk-w">–</div><div class="skl">✅ THIS WEEK</div></div>
+      </div>
+      <div class="card" style="margin-bottom:.7rem"><div class="sttl" style="margin-bottom:.65rem">INTEL BREAKDOWN</div><div id="bkdn"></div></div>
+      <div class="card"><div class="sttl" style="margin-bottom:.65rem">SYSTEM LOG</div><div class="ll" id="slog"></div></div>
+    </div>
+
+    <!-- P4 OPS -->
+    <div class="pg" id="p4">
+      <div class="sttl">⚙️ Command Ops</div>
+      <div class="ucrd">
+        <div class="uav" id="uav" onclick="document.getElementById('iav').click()">🐺</div>
+        <input type="file" id="iav" class="hi" accept="image/*" onchange="uploadAvatar(this)">
+        <div class="uinfo">
+          <div class="un" id="uname">COMMANDER</div>
+          <div class="ur">SHADOW KING — WOLF PACK ALPHA</div>
+          <div class="ubio" id="ubio" onclick="editBio(this)">بیو خودت رو بنویس...</div>
+          <div class="ustat">
+            <div class="sb"><div class="sv" id="us-c">0</div><div class="sl">COINS</div></div>
+            <div class="sb"><div class="sv" id="us-l">1</div><div class="sl">LEVEL</div></div>
+            <div class="sb"><div class="sv" id="us-s">0</div><div class="sl">STREAK</div></div>
+          </div>
+        </div>
+      </div>
+      <button class="opb g" id="btn-daily" onclick="opDaily(this)"><span>📊 گزارش روزانه AI (Fenrir)</span><span class="opa">↗</span></button>
+      <button class="opb g" id="btn-weekly" onclick="opWeekly(this)"><span>📈 گزارش هفتگی Wolf Pack</span><span class="opa">↗</span></button>
+      <button class="opb a" id="btn-scout" onclick="opScout(this)"><span>🛩️ پهپاد شناسایی Scout Drone</span><span class="opa">↗</span></button>
+      <button class="opb" id="btn-sync" onclick="opSync(this)"><span>🔄 همگام‌سازی Google Sheets</span><span class="opa">↗</span></button>
+      <button class="opb" onclick="openModal()"><span>⏰ یادآور </span><span class="opa">↗</span></button>
+      <button class="opb a" id="btn-cls" onclick="opClassifyModal(this)"><span>🧠 AI Classify </span><span class="opa">↗</span></button>
+      <button class="opb" style="border-color:rgba(255,68,102,.18);color:rgba(255,68,102,.52)" onclick="opClr()"><span>🗑️ پاکسازی ماموریت‌های تموم شده</span><span class="opa">↗</span></button>
+      <div class="card" style="margin-top:.9rem">
+        <div class="sttl" style="margin-bottom:.45rem">SYSTEM STATUS</div>
+        <div class="ss" id="syss">
+          N8N (orca-9595): <span class="ok">CHECKING...</span><br>
+          GOOGLE SHEETS: <span class="ok">SYNCED</span><br>
+          REMINDER SYS: <span class="ok">EVERY 10 MIN</span><br>
+          AI GATEWAY: <span class="ok">ONLINE</span><br>
+          TG BOT: <span class="ok">CONNECTED</span><br>
+          CORS PROXY: <span class="ok" id="proxy-status">auto-detecting...</span>
+        </div>
+        <button class="opb" style="margin-top:.7rem" onclick="diagnose(this)"><span>🔬 تست اتصال (Diagnose)</span><span class="opa">↗</span></button>
+        <button class="opb" style="margin-top:.4rem" onclick="setCustomProxy()"><span>🛡️ تنظیم Proxy شخصی (Cloudflare Worker)</span><span class="opa">↗</span></button>
+      </div>
+    </div>
+  </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         CAPTURE BAR — REDESIGNED (v7.1 Galactic)
+         Single, focused, dramatic. Action chips fold out from a
+         single trigger to keep the bar compact but expressive.
+         ═══════════════════════════════════════════════════ -->
+  <div class="capbar">
+    <input type="file" id="ii" class="hi" accept="image/*,video/*" onchange="hmed(this,'image')">
+    <input type="file" id="iv" class="hi" accept="audio/*" onchange="hmed(this,'voice')">
+    <input type="file" id="id2" class="hi" accept=".pdf,.doc,.docx,.txt,.xlsx,.xls,.ppt,.pptx" onchange="hmed(this,'document')">
+
+    <!-- Expanding action drawer (hidden by default, opens with + button) -->
+    <div class="cap-actions" id="cap-actions">
+      <button class="cap-act img" type="button" onclick="document.getElementById('ii').click();toggleCapActions(false)" title="عکس / ویدیو">
+        <span class="ico">📷</span><span class="lbl">عکس</span>
+      </button>
+      <button class="cap-act mic" type="button" id="cap-mic" onclick="capToggleMic()" title="ضبط صدا">
+        <span class="ico">🎙</span><span class="lbl">ویس</span>
+      </button>
+      <button class="cap-act doc" type="button" onclick="document.getElementById('id2').click();toggleCapActions(false)" title="فایل / سند">
+        <span class="ico">📄</span><span class="lbl">فایل</span>
+      </button>
+      <button class="cap-act ai" type="button" onclick="openAI()" title="گفتگو با فنریر">
+        <span class="ico">🐺</span><span class="lbl">فنریر</span>
+      </button>
+    </div>
+
+    <!-- Single-row main bar -->
+    <div class="cap-main">
+      <button class="cap-plus" type="button" onclick="toggleCapActions()" aria-label="منو ضمیمه">
+        <span class="cap-plus-i">+</span>
+      </button>
+      <input class="cap-in" id="cin" placeholder="هرچی تو ذهنته، بنویس…  متن، ایده، تسک 🐺" onkeydown="if(event.key==='Enter')doCapture()">
+      <button class="cap-fire" id="fb" type="button" onclick="doCapture()" aria-label="ارسال">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   API — دقیقاً همون endpoints Lux+ (orca-9595 preserved)
+   ════════════════════════════════════════════════════════ */
+// ════════════════════════════════════════════════════════
+// CONFIG — orca-9595 (production instance)
+// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// ⚙️  CONFIG — فقط این خط رو عوض کن
+// لوکال:  http://localhost:5678/webhook
+// Cloud:  https://orca-9595.app.n8n.cloud/webhook
+// بله:    http://YOUR-SERVER-IP:5678/webhook
+// ══════════════════════════════════════════════════════
+const N8N = 'https://orca-9595.app.n8n.cloud/webhook';
+const API = {
+  // ▶ MAIN INBOUND — Scout Drone pipeline (text/classify/AI/DB)
+  INBOUND:  N8N + '/telegram/lifeops_inbound',
+  // ▶ DATA VAULT — Second Brain v3 (read items from Google Sheets)
+  ITEMS:    N8N + '/items',
+  // ▶ REMINDER SYSTEM — SSA Reminder Receiver v2
+  REMINDER: N8N + '/reminder',
+  // ▶ AI GATEWAY — classify only (no full pipeline)
+  CLASSIFY: N8N + '/ai/classify',
+  // ▶ AI SUMMARIZE — daily/weekly reports
+  SUMMARY:  N8N + '/ai/summarize',
+  // ▶ LOGGING
+  LOG:      N8N + '/LifeOps/log',
+  // ▶ VOICE — Whisper transcription (falls back to CLASSIFY if missing)
+  VOICE:    N8N + '/ai/voice',
+  // ▶ CHAT — direct chat alias (falls back to CLASSIFY)
+  CHAT:     N8N + '/ai/chat',
+  // ▶ PROFILE — bio/avatar updates
+  PROFILE:  N8N + '/profile',
+};
+const BOT_TOKEN = '8248107394:AAHQ_bjEDbiVwiyOd5CCzvswRPxidUU1doc';
+const DEFAULT_CHAT_ID = '5953981409';
+let USER_ID = DEFAULT_CHAT_ID;
+let XP_CUR = 0, XP_MAX = 5000, STREAK = 0;
+
+/* ══ TELEGRAM SDK ══ */
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready(); tg.expand();
+  tg.setHeaderColor?.('#04001e');
+  tg.setBackgroundColor?.('#000008');
+  const u = tg.initDataUnsafe?.user;
+  if (u) {
+    USER_ID = String(u.id);
+    document.getElementById('uname').textContent = (u.first_name||'')+(u.last_name?' '+u.last_name:'');
+    if (u.photo_url) document.getElementById('uav').innerHTML = `<img src="${u.photo_url}" alt="">`;
+  }
+}
+const H  = t => tg?.HapticFeedback?.impactOccurred(t||'light');
+const HN = t => tg?.HapticFeedback?.notificationOccurred(t||'success');
+
+/* ══ TOAST ══ */
+function toast(msg, type='', dur=2800){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+(type||'');
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), dur);
+}
+
+/* ══ CAPTURE BAR — action drawer ══ */
+function toggleCapActions(force){
+  const drawer = document.getElementById('cap-actions');
+  const plus = document.querySelector('.cap-plus');
+  const willOpen = (typeof force === 'boolean') ? force : !drawer.classList.contains('show');
+  drawer.classList.toggle('show', willOpen);
+  plus?.classList.toggle('open', willOpen);
+  if (willOpen) H('light');
+}
+// Close drawer when tapping outside
+document.addEventListener('click', e => {
+  const cap = document.querySelector('.capbar');
+  const drawer = document.getElementById('cap-actions');
+  if (drawer?.classList.contains('show') && cap && !cap.contains(e.target)) {
+    toggleCapActions(false);
+  }
+}, { capture:true });
+
+/* ══ DOPAMINE BURST ══ */
+function burstP(x,y){
+  const cols=['#9b59ff','#00ff88','#00d4ff','#c084fc','#ffb700','#ff3ec9'];
+  for(let i=0;i<14;i++){
+    const p=document.createElement('div'); p.className='dpar';
+    p.style.background=cols[~~(Math.random()*cols.length)];
+    p.style.left=x+'px'; p.style.top=y+'px';
+    p.style.boxShadow=`0 0 10px ${p.style.background}`;
+    const a=(Math.PI*2*i)/14, d=55+Math.random()*55;
+    p.style.setProperty('--dx', Math.cos(a)*d+'px');
+    p.style.setProperty('--dy', Math.sin(a)*d+'px');
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),900);
+  }
+}
+
+/* ══ LOCAL STATE ══ */
+let T=[], CF='all', loaded=false;
+
+/* ══ FETCH WRAPPER — n8n Cloud CORS bypass via public proxy ══
+   ROOT CAUSE: n8n Cloud webhooks don't respond to OPTIONS preflight requests
+   (known limitation per github.com/n8n-io/n8n/issues/18143 + corsproxy.io blog).
+   Setting Access-Control headers on the Webhook node only applies AFTER the workflow
+   runs — but the browser sends OPTIONS BEFORE the workflow even starts.
+
+   SOLUTION: Route every request through a public CORS proxy that adds the
+   Access-Control-Allow-Origin: * header on every response, INCLUDING OPTIONS.
+   We try multiple proxies in order; if one fails, the next is tried.
+
+   The free corsproxy.io plan allows requests from:
+     • localhost / 127.0.0.1
+     • *.github.io, *.ngrok.io, *.trycloudflare.com
+     • Sandboxes: CodePen, JSFiddle, CodeSandbox, StackBlitz, Replit, Glitch, Gitpod
+   This covers our deployment (GitHub Pages). */
+
+const PROXIES = [
+  // 1. AllOrigins — old, Cloudflare-free, generally accessible from anywhere
+  {
+    name: 'allorigins',
+    build: (url) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+  },
+  // 2. cors.sh — public Cloudflare worker (different infra from corsproxy.io)
+  {
+    name: 'corssh',
+    build: (url) => 'https://proxy.cors.sh/' + url,
+  },
+  // 3. corsproxy.io — works for github.io
+  {
+    name: 'corsproxy.io',
+    build: (url) => 'https://corsproxy.io/?url=' + encodeURIComponent(url),
+  },
+  // 4. thingproxy — independent infrastructure
+  {
+    name: 'thingproxy',
+    build: (url) => 'https://thingproxy.freeboard.io/fetch/' + url,
+  },
+  // 5. codetabs
+  {
+    name: 'codetabs',
+    build: (url) => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(url),
+  },
+  // 6. cors-anywhere demo (often rate-limited but free)
+  {
+    name: 'cors-anywhere',
+    build: (url) => 'https://cors-anywhere.herokuapp.com/' + url,
+  },
+  // 7. last resort: direct (works only if n8n CORS is set correctly or if from same-origin)
+  {
+    name: 'direct',
+    build: (url) => url,
+  },
+];
+
+// Clear any stale persisted proxy index (kept by older versions) — it caused
+// the wrong proxy to be tried first after reload.
+try { localStorage.removeItem('lifeops_proxy_idx'); } catch(_) {}
+
+// Load custom proxy URL (Cloudflare Worker) from storage and prepend to PROXIES.
+// MUST happen BEFORE reading the saved index, because adding/removing custom
+// shifts all indices. We just always start from 0 (custom or first public) and
+// let apiFetch find the working one on first call.
+try {
+  const customUrl = localStorage.getItem('lifeops_custom_proxy');
+  if (customUrl && customUrl.startsWith('http')) {
+    PROXIES.unshift({
+      name: 'custom',
+      // Use path-style routing so the Worker's `?url=` query forwards correctly
+      build: (url) => customUrl.replace(/\/+$/, '') + '/?url=' + encodeURIComponent(url),
+    });
+  }
+} catch(_) {}
+
+// Track the last-working proxy in memory (NOT persisted across reloads — the
+// proxy list can change shape, and a stale index can point to the wrong one).
+let WORKING_PROXY_IDX = 0;
+
+function setCustomProxy() {
+  const current = (() => { try { return localStorage.getItem('lifeops_custom_proxy') || ''; } catch(_) { return ''; } })();
+  const url = prompt(
+    'URL یک Cloudflare Worker یا proxy شخصی بزن (مثلا https://my-worker.your-account.workers.dev).\n' +
+    'این Proxy باید با pattern /?url=<target> کار کنه.\n\n' +
+    'برای پاک کردن، خالی بفرست.\n\n' +
+    'کد آماده Worker در README دسترس هست.',
+    current
+  );
+  if (url === null) return;
+  if (url === '') {
+    try { localStorage.removeItem('lifeops_custom_proxy'); } catch(_) {}
+    toast('🗑️ Proxy شخصی پاک شد. ریفرش کن.', '', 3000);
+    return;
+  }
+  try { localStorage.setItem('lifeops_custom_proxy', url.trim()); } catch(_) {}
+  toast('✅ Proxy شخصی ست شد. ریفرش کن تا فعال بشه.', 'ok', 3500);
+}
+
+async function apiFetch(url, opts={}){
+  const method = (opts.method || 'GET').toUpperCase();
+  const headers = { ...opts.headers };
+  if ((method === 'POST' || method === 'PUT') && typeof opts.body === 'string') {
+    if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
+  }
+  const order = [WORKING_PROXY_IDX, ...PROXIES.map((_, i) => i).filter(i => i !== WORKING_PROXY_IDX)];
+  let lastErr = null;
+  for (const idx of order) {
+    const proxy = PROXIES[idx];
+    const proxiedUrl = proxy.build(url);
+    try {
+      const r = await Promise.race([
+        fetch(proxiedUrl, { method, headers, body: opts.body, mode: 'cors', cache: 'no-store' }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 45000))
+      ]);
+      if (!r.ok) { lastErr = new Error('HTTP ' + r.status + ' via ' + proxy.name); continue; }
+      WORKING_PROXY_IDX = idx;
+      const ct = r.headers.get('content-type') || '';
+      if (ct.includes('json')) return await r.json();
+      const txt = await r.text();
+      try { return JSON.parse(txt); } catch { return { raw: txt }; }
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('All CORS proxies failed');
+}
+
+/* ══ FIRE-AND-FORGET POST — last-ditch reliability for writes ══
+   When all CORS proxies fail, we can still WRITE data to n8n by using
+   the browser's no-cors mode. We can't read the response, but the request
+   is delivered. This means: at minimum, the data lands in Sheets even if
+   the assistant can't show a reply. Used as a fallback for POST. */
+async function fireAndForgetPost(url, jsonBody) {
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, // simple request, no preflight
+      body: jsonBody,
+      keepalive: true,
+    });
+    return { ok: true, opaque: true };
+  } catch(e) {
+    throw e;
+  }
+}
+
+/* ══ IMAGE COMPRESSION — fit images under Sheets 50K char limit ══
+   Browser-side resize + quality reduction so base64 fits in a cell.
+   Iteratively reduces width and JPEG quality until the result is under target. */
+async function compressImage(file, maxBase64Bytes) {
+  // Load image into a canvas
+  const img = await new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => { URL.revokeObjectURL(url); resolve(im); };
+    im.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load')); };
+    im.src = url;
+  });
+
+  // Iteratively shrink + reduce quality until under target
+  // Base64 size ≈ rawBytes * 1.37 + data-url-prefix overhead
+  const targetRawBytes = Math.floor(maxBase64Bytes * 0.7); // safety margin
+
+  const widths = [1200, 900, 700, 540, 400, 320, 240];
+  const qualities = [0.78, 0.65, 0.5, 0.4, 0.32];
+
+  for (const w of widths) {
+    if (img.width <= w * 0.6) continue; // already smaller, skip this width
+    const ratio = Math.min(1, w / img.width);
+    const cw = Math.round(img.width * ratio);
+    const ch = Math.round(img.height * ratio);
+    const canvas = document.createElement('canvas');
+    canvas.width = cw; canvas.height = ch;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, cw, ch);
+
+    for (const q of qualities) {
+      const dataUrl = canvas.toDataURL('image/jpeg', q);
+      // dataUrl.length is roughly the bytes-in-string
+      if (dataUrl.length <= maxBase64Bytes) {
+        return { dataUrl, size: dataUrl.length, width: cw, height: ch, quality: q };
+      }
+    }
+  }
+
+  // Final attempt: tiny + ultra-low quality
+  const canvas = document.createElement('canvas');
+  canvas.width = 200;
+  canvas.height = Math.round(200 * img.height / img.width);
+  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.25);
+  if (dataUrl.length <= maxBase64Bytes) {
+    return { dataUrl, size: dataUrl.length, width: canvas.width, height: canvas.height, quality: 0.25 };
+  }
+  return null;
+}
+
+/* ══ UNWRAP n8n response shapes ══
+   n8n's Respond-to-Webhook with "respondWith: allIncomingItems" wraps the
+   result in a top-level array. We normalize all possible shapes into a flat
+   array of rows. Used by every reader of /items. */
+function unwrapItems(d) {
+  if (!d) return [];
+  let payload = d;
+  if (Array.isArray(payload) && payload.length > 0 && payload[0] && typeof payload[0] === 'object') {
+    if (Array.isArray(payload[0].items)) return payload[0].items;
+    if (payload[0].id || payload[0].content || payload[0].source) return payload;
+  }
+  if (payload && Array.isArray(payload.items)) return payload.items;
+  if (Array.isArray(payload)) return payload;
+  return [];
+}
+
+/* ══ LOAD LIVE — reads from Second Brain v3 (Google Sheets via n8n) ══ */
+async function loadLive(){
+  // Restore stored avatar if any
+  try {
+    const av = localStorage.getItem('lifeops_avatar');
+    if (av) document.getElementById('uav').innerHTML = `<img src="${av}">`;
+  } catch(_) {}
+  slog('SYNC → orca-9595 Sheets (last 7 days)...');
+  try {
+    // ▶ Window: last 7 days (168 hours). Previously 720h (30 days) → too noisy.
+    const d = await apiFetch(API.ITEMS + '?since_hours=168');
+    let arr = unwrapItems(d);
+    slog('PARSED: ' + arr.length + ' rows from response');
+
+    if (arr.length > 0) {
+      // Filter out invalid rows + archived items
+      arr = arr.filter(it => {
+        if (!it || !it.id) return false;
+        if (String(it.id).toLowerCase() === 'id') return false; // header row
+        if (String(it.source||'').toLowerCase() === 'source') return false; // header row
+        // Skip rows where content is empty AND there's no attachment — empty ghost row
+        const hasContent = it.content && String(it.content).trim().length > 0;
+        const hasAttachment = it.attachment_url && String(it.attachment_url).length > 0;
+        if (!hasContent && !hasAttachment) return false;
+        // Skip archived items (purged via OPS "clean done") — hidden from UI forever
+        const tagStr = String(it.tags_json || it.tags || '');
+        if (tagStr.includes('archived')) return false;
+        return true;
+      });
+
+      if (arr.length === 0) {
+        T = [];
+        slog('SHEETS: all rows invalid/empty');
+        updateSysStatus('w', 'NO VALID ROWS');
+        toast('📭 رکورد معتبری در دیتابیس نیست', '', 2800);
+        renderAll(); rebuildB();
+        return;
+      }
+
+      // Sort by created_at descending — newest first
+      arr.sort((a, b) => new Date(b.created_at||0) - new Date(a.created_at||0));
+
+      // Load any local state overrides (cached done/archived states)
+      const localState = loadLocalState();
+
+      T = arr.map(it => {
+        const tags = parseTags(it.tags_json || it.tags);
+        const idStr = String(it.id || '');
+        const override = localState[idStr];
+        // `done` is derived from server tag 'done' OR a local 'done' override
+        const isDone = tags.includes('done') || override === 'done';
+        return {
+          id:              it.id || String(Date.now() + Math.random()),
+          text:            it.content || '',
+          type:            it.item_type || 'note',
+          priority:        it.priority || 'normal',
+          done:            isDone,
+          tags:            isDone && !tags.includes('done') ? [...tags, 'done'] : tags,
+          ts:              new Date(it.created_at || Date.now()).getTime(),
+          external_id:     it.external_id || String(it.id || ''),
+          source:          it.source || 'sheet',
+          attachment_url:  it.attachment_url  || '',
+          attachment_type: it.attachment_type || '',
+          _localOverride:  override || null,
+        };
+      });
+
+      // Filter out items that the user archived locally (PUT may have failed but
+      // we respect the user's intent on this device)
+      T = T.filter(t => t._localOverride !== 'archived');
+      loaded = true;
+      updateSysStatus('ok', 'ACTIVE ✓ (' + T.length + ' رکورد)');
+      slog('LOADED: ' + T.length + ' ITEMS FROM SHEETS');
+      toast('✅ ' + T.length + ' آیتم لود شد', 'ok');
+
+      // Show last 10 on radar immediately
+      rebuildB();
+    } else {
+      // ▶ Empty sheets → empty state, no demo data injected
+      T = [];
+      slog('SHEETS: EMPTY (0 items)');
+      updateSysStatus('w', 'SHEETS EMPTY');
+      toast('📭 دیتابیس خالیه — اولین تسک رو ثبت کن!', '', 2800);
+    }
+  } catch(e) {
+    // ▶ Network/server error → empty state, NO fake records
+    T = [];
+    updateSysStatus('er', e.message.slice(0, 32));
+    slog('OFFLINE: ' + e.message.slice(0, 28));
+    toast('⚠️ سرور در دسترس نیست — ' + e.message.slice(0,18), 'err', 3200);
+  }
+  renderAll();
+  rebuildB();
+  document.getElementById('us-c').textContent = T.length;
+  document.getElementById('us-s').textContent = STREAK;
+}
+
+function parseTags(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  try { return JSON.parse(raw); } catch {
+    return String(raw).split(',').map(s => s.trim()).filter(Boolean);
+  }
+}
+
+function loadDemoData() {
+  T = [
+    {id:'d1',text:'گزارش پروژه LifeOps رو آماده کن',type:'task',priority:'high',done:false,tags:['work','project'],ts:Date.now(),source:'demo',external_id:'d1'},
+    {id:'d2',text:'تماس با سرمایه‌گذار — فردا ساعت ۱۰',type:'reminder',priority:'high',done:false,tags:['business'],ts:Date.now()-3600000,source:'demo',external_id:'d2'},
+    {id:'d3',text:'ایده: AGI Gamified — داشبورد کاربران',type:'idea',priority:'normal',done:false,tags:['product','ai'],ts:Date.now()-7200000,source:'demo',external_id:'d3'},
+    {id:'d4',text:'قبض برق این ماه',type:'finance',priority:'normal',done:false,tags:['bills'],ts:Date.now()-86400000,source:'demo',external_id:'d4'},
+    {id:'d5',text:'مستندات API Webhook — کامل کردن',type:'task',priority:'normal',done:false,tags:['dev','api'],ts:Date.now()-3600000*2,source:'demo',external_id:'d5'},
+    {id:'d6',text:'جلسه فردا ساعت ۱۰ — تیم طراحی',type:'event',priority:'high',done:false,tags:['meeting','team'],ts:Date.now()-3600000*3,source:'demo',external_id:'d6'},
+    {id:'d7',text:'تمرین مقاومتی — باشگاه',type:'health',priority:'low',done:true,tags:['fitness'],ts:Date.now()-3600000,source:'demo',external_id:'d7'},
+    {id:'d8',text:'شیر تموم شده',type:'shopping',priority:'normal',done:false,tags:['grocery'],ts:Date.now()-7200000,source:'demo',external_id:'d8'},
+  ];
+  STREAK = 3;
+}
+
+function updateSysStatus(level, msg) {
+  const el = document.getElementById('syss');
+  if (!el) return;
+  const cls = level === 'ok' ? 'ok' : level === 'er' ? 'er' : 'w';
+  const proxyName = PROXIES[WORKING_PROXY_IDX]?.name || '?';
+  el.innerHTML =
+    'N8N: <span class="'+cls+'">'+msg+'</span><br>' +
+    'DB: <span class="ok">SHEETS / SQLite</span><br>' +
+    'REMINDER SYS: <span class="ok">EVERY 10 MIN</span><br>' +
+    'AI GATEWAY: <span class="ok">FENRIR CORE</span><br>' +
+    'BOT: <span class="ok">ACTIVE</span><br>' +
+    'CORS PROXY: <span class="ok">'+proxyName+'</span>';
+}
+
+/* ══ INTRO ══ */
+let entered=false;
+function enter(){
+  if(entered) return; entered=true; H('heavy');
+  document.getElementById('whtun').classList.add('go');
+  setTimeout(()=>{
+    document.getElementById('intro').classList.add('exit');
+    setTimeout(()=>{
+      document.getElementById('intro').style.display='none';
+      document.getElementById('app').classList.add('on');
+      renderAll(); rebuildB(); drawR();
+      setTimeout(loadLive, 500);
+    }, 550);
+  }, 480);
+}
+
+/* Intro particles */
+(()=>{
+  const c=document.getElementById('iparts');
+  const cols=['rgba(155,89,255,','rgba(0,212,255,','rgba(0,255,136,','rgba(192,132,252,','rgba(255,62,201,'];
+  for(let i=0;i<36;i++){
+    const d=document.createElement('div'); d.className='fpt';
+    const s=Math.random()*2.6+.7, col=cols[~~(Math.random()*cols.length)];
+    d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:0;background:${col}${Math.random()*.65+.3});animation-duration:${Math.random()*14+9}s;animation-delay:${Math.random()*18}s;box-shadow:0 0 4px ${col}.5)`;
+    c.appendChild(d);
+  }
+})();
+
+/* ══ CLOCK ══ */
+function tick(){
+  const t = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tehran'}));
+  document.getElementById('clk').textContent = String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+}
+setInterval(tick,5000); tick();
+
+/* ══ NAV ══ */
+let curTab=0;
+function gt(i,el){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  document.querySelectorAll('.pg').forEach((p,j)=>p.classList.toggle('on',j===i));
+  curTab=i; H();
+  if(i===2) renderV();
+  if(i===3){ renderBkdn(); setTimeout(()=>{document.getElementById('xpf').style.width=~~(XP_CUR/XP_MAX*100)+'%'},180) }
+}
+
+/* ══ TYPE COLORS ══ */
+const TC = {
+  task:{bd:'rgba(0,212,255,.38)',cl:'rgba(0,212,255,.68)'},
+  reminder:{bd:'rgba(155,89,255,.38)',cl:'rgba(155,89,255,.68)'},
+  idea:{bd:'rgba(0,255,136,.38)',cl:'rgba(0,255,136,.68)'},
+  finance:{bd:'rgba(255,183,0,.38)',cl:'rgba(255,183,0,.68)'},
+  health:{bd:'rgba(255,68,102,.38)',cl:'rgba(255,68,102,.68)'},
+  event:{bd:'rgba(192,132,252,.38)',cl:'rgba(192,132,252,.68)'},
+  note:{bd:'rgba(232,240,255,.2)',cl:'rgba(232,240,255,.42)'},
+  voice:{bd:'rgba(0,255,136,.38)',cl:'rgba(0,255,136,.68)'},
+  image:{bd:'rgba(0,212,255,.38)',cl:'rgba(0,212,255,.68)'},
+  document:{bd:'rgba(255,183,0,.38)',cl:'rgba(255,183,0,.68)'},
+  research:{bd:'rgba(0,212,255,.38)',cl:'rgba(0,212,255,.68)'},
+  shopping:{bd:'rgba(255,183,0,.38)',cl:'rgba(255,183,0,.68)'},
+};
+const tc = t => TC[t] || TC.note;
+
+/* ══ RENDER MISSIONS ══ */
+function renderM(){
+  const list = T.filter(t => CF==='all' || t.type===CF);
+  const el = document.getElementById('mlist');
+  if (list.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:rgba(155,89,255,.35);font-family:Share Tech Mono,monospace;font-size:10px;padding:30px">NO MISSIONS IN THIS SECTOR</div>';
+    return;
+  }
+  el.innerHTML = '';
+  list.forEach((t, i) => {
+    const c = tc(t.type);
+    const div = document.createElement('div');
+    div.className = 'msn' + (t.done ? ' done' : '');
+    div.style.animationDelay = (i * 0.026) + 's';
+    div.innerHTML =
+      '<button class="mck" type="button">' + (t.done ? '&#x2713;' : '') + '</button>' +
+      '<div class="mb2">' +
+        '<div class="mt">' + esc(t.text) + '</div>' +
+        '<div class="mf">' +
+          '<span class="mty" style="color:' + c.cl + ';border-color:' + c.bd + '">' + t.type.toUpperCase() + '</span>' +
+          (t.tags||[]).slice(0,2).map(tg => '<span class="mtg">#' + esc(tg) + '</span>').join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="mp ' + (t.priority==='high'?'ph':t.priority==='normal'?'pn':'pl') + '"></div>';
+
+    // FIX: direct listener on each button — no inline onclick, no delegation issues
+    div.querySelector('.mck').addEventListener('click', function(e) {
+      e.stopPropagation();
+      tog(t.id);
+    });
+    div.addEventListener('click', function(e) {
+      if (!e.target.classList.contains('mck')) toast('\ud83c\udfaf ' + t.text.slice(0,36));
+    });
+    el.appendChild(div);
+  });
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ══ LOCAL STATE OVERRIDE — defensive backup ══
+   The Sheet has no `status` column, so we store done state in tags_json on the
+   server via PUT. But proxies are flaky; if PUT fails silently, the tick is lost
+   on next reload. We keep a localStorage mirror of {id → 'done'|'archived'} so
+   the user always sees the truth they last set, regardless of server lag. */
+const LOCAL_STATE_KEY = 'lifeops_item_state';
+
+function loadLocalState() {
+  try { return JSON.parse(localStorage.getItem(LOCAL_STATE_KEY) || '{}') || {}; }
+  catch(_) { return {}; }
+}
+function saveLocalState(state) {
+  try { localStorage.setItem(LOCAL_STATE_KEY, JSON.stringify(state)); } catch(_) {}
+}
+function setLocalItemState(id, state) {
+  const all = loadLocalState();
+  if (state === null) delete all[id];
+  else all[id] = state;
+  saveLocalState(all);
+}
+
+/* FIX tog: all item types, dopamine burst, syncs via PUT to Second Brain.
+   IMPORTANT: The Sheet has NO 'status' column. We persist `done` state by
+   adding/removing the synthetic tag 'done' in tags_json. On next loadLive,
+   any item whose tags contain 'done' is treated as completed. */
+function tog(id) {
+  const t = T.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  // Sync done state into the tags array — this is what persists across reloads
+  const baseTags = (t.tags || []).filter(x => x !== 'done');
+  t.tags = t.done ? [...baseTags, 'done'] : baseTags;
+  // Defensive: also write to localStorage so state survives proxy failures
+  setLocalItemState(t.id, t.done ? 'done' : null);
+  H('medium');
+  renderM(); refreshS(); rebuildB();
+  if (t.done) {
+    HN('success');
+    burstP(window.innerWidth/2, window.innerHeight/2);
+    setTimeout(() => burstP(window.innerWidth/2 + 50, window.innerHeight/2 - 50), 110);
+    setTimeout(() => burstP(window.innerWidth/2 - 40, window.innerHeight/2 + 40), 220);
+    toast('\u2705 \u0622\u0641\u0631\u06cc\u0646 \u0641\u0631\u0645\u0627\u0646\u062f\u0647! \ud83d\udc3a', 'ok', 2000);
+    XP_CUR = Math.min(XP_CUR + 50, XP_MAX);
+  }
+  // Sync to Second Brain v3 via PUT — only for real DB items (not local/demo)
+  if (t.source !== 'demo' && t.id && !String(t.id).startsWith('l') && !String(t.id).startsWith('d')) {
+    apiFetch(API.ITEMS + '/' + t.id, {
+      method: 'PUT',
+      body: JSON.stringify({
+        id: t.id, source: t.source || 'tma',
+        external_id: t.external_id || t.id,
+        content: t.text, author: USER_ID,
+        created_at: new Date(t.ts).toISOString(),
+        item_type: t.type, priority: t.priority,
+        tags: t.tags || [], attachment_url: t.attachment_url || '',
+        attachment_type: t.attachment_type || '',
+        attachment_size: 0, attachment_text: '',
+        updated_at: new Date().toISOString()
+      })
+    }).catch(e => slog('SYNC: ' + e.message.slice(0,20)));
+  }
+}
+
+function flt(f,el){
+  CF=f; H();
+  if(el){ document.querySelectorAll('.fp').forEach(x=>x.classList.remove('on')); el.classList.add('on') }
+  renderM();
+}
+
+function refreshS(){
+  const now=Date.now(),td=now-(now%(24*3600*1000));
+  document.getElementById('s-hi').textContent = T.filter(t=>t.priority==='high'&&!t.done).length;
+  document.getElementById('s-do').textContent = T.filter(t=>t.done&&t.ts>=td).length;
+  document.getElementById('s-rm').textContent = T.filter(t=>t.type==='reminder'&&!t.done).length;
+}
+
+/* ══ CAPTURE — routes through main INBOUND pipeline (Scout Drone) ══ */
+async function doCapture(){
+  const inp = document.getElementById('cin');
+  const val = inp.value.trim();
+  if (!val) return;
+  const btn = document.getElementById('fb');
+  btn.classList.add('loading');
+  H('medium'); inp.value = '';
+
+  // Optimistic local add — appears on radar IMMEDIATELY
+  const extId = 'tma_' + Date.now();
+  const newT = {
+    id: 'l' + Date.now(), text: val, type: 'note', priority: 'normal',
+    done: false, tags: [], ts: Date.now(), source: 'tma', external_id: extId,
+  };
+  T.unshift(newT);
+  renderAll(); rebuildB();
+
+  try {
+    // ▶ STRATEGY: hit INBOUND → Scout Drone runs full pipeline:
+    //   Normalize → Validate → Memory slice → Cognitive Core → Classify+Reply → DB write
+    // The Scout Drone "Normalize" node prefers a Telegram-shaped `message` object.
+    // It will return an array of items (one with assistant_message, classification, etc).
+    const payload = {
+      source: 'tma',
+      external_id: extId,
+      content: val,
+      author: USER_ID,
+      created_at: new Date().toISOString(),
+      message: {
+        message_id: Date.now(),
+        text: val,
+        date: Math.floor(Date.now()/1000),
+        from: { id: parseInt(USER_ID)||5953981409, username: 'tma_user', first_name: 'Commander' },
+        chat: { id: parseInt(USER_ID)||5953981409 }
+      }
+    };
+
+    const res = await apiFetch(API.INBOUND, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    // INBOUND typically replies fast with { status: 'received' } — actual classification
+    // lands in Sheets later. We poll /items to grab the classified row + assistant_message.
+    setAI('پیامت رفت تو خط فرمانده، Cognitive Core داره فکر می‌کنه...');
+    toast('✅ فرستاده شد — درحال تحلیل', 'ok', 2000);
+    HN('success');
+    burstP(window.innerWidth/2, window.innerHeight - 80);
+
+    // Poll for classification (max 6 tries × 1.5s = 9s)
+    for (let i = 0; i < 6; i++) {
+      await new Promise(r => setTimeout(r, 1500));
+      try {
+        const polled = await apiFetch(API.ITEMS + '?source=tma&external_id=' + encodeURIComponent(extId));
+        const items = unwrapItems(polled);
+        if (items.length > 0) {
+          const row = items[0];
+          let raw = {};
+          try { raw = JSON.parse(row.raw_json || '{}'); } catch(_) {}
+          // Update local item with real classification
+          newT.id = row.id || newT.id;
+          newT.type = row.item_type || newT.type;
+          newT.priority = row.priority || newT.priority;
+          newT.tags = parseTags(row.tags_json || row.tags);
+          renderAll(); rebuildB();
+          if (raw.assistant_message) {
+            setAI(raw.assistant_message);
+            break;
+          }
+        }
+      } catch(_) {}
+    }
+  } catch(e) {
+    // ▶ ALL CORS PROXIES FAILED — last-ditch: fire-and-forget no-cors POST
+    // This delivers the message to n8n even though we can't read the response.
+    // The Telegram bot will reply (which is what worked before).
+    slog('INBOUND via proxies failed; falling back to no-cors POST');
+    try {
+      await fireAndForgetPost(API.INBOUND, JSON.stringify(payload));
+      toast('📡 فقط بات پاسخ می‌ده (CORS بسته)', '', 3000);
+      setAI('پیامت رفت فرمانده. CORS proxy fail شد — پاسخ از طریق بات تلگرام میاد. 🐺');
+      // Also try a fire-and-forget /items so the row exists
+      apiFetch(API.ITEMS, {
+        method: 'POST',
+        body: JSON.stringify({
+          source: 'tma', external_id: extId, content: val,
+          author: USER_ID, created_at: new Date().toISOString(),
+          item_type: 'note', priority: 'normal', tags: ['fallback'],
+          attachment_url:'', attachment_type:'', attachment_size:0, attachment_text:'',
+          raw: { via: 'no_cors_fallback' }
+        })
+      }).catch(()=> {
+        // even apiFetch failed — try fire-and-forget here too
+        fireAndForgetPost(API.ITEMS, JSON.stringify({
+          source:'tma', external_id:extId, content:val, author:USER_ID,
+          created_at: new Date().toISOString(), item_type:'note', priority:'normal',
+          tags:['fallback','no_cors'], raw:{ via:'no_cors_items' }
+        })).catch(()=>{});
+      });
+    } catch(_) {
+      toast('⚠️ فقط محلی ذخیره شد — شبکه بلاکه', 'err', 3000);
+      setAI('شبکه بلاکه. آیتم محلی ذخیره شد ولی به سرور نرسید. VPN رو چک کن. 🐺');
+    }
+  }
+
+  btn.classList.remove('loading');
+}
+
+/* ══ MEDIA UPLOAD — direct to /items (no INBOUND for binary) ══ */
+async function hmed(inp, mtype) {
+  const f = inp.files?.[0];
+  if (!f) return;
+  H('medium');
+  inp.value = '';
+
+  const extId = mtype + '_' + Date.now();
+  const itemType = mtype === 'image' ? 'image' : mtype === 'voice' ? 'voice' : 'document';
+  const sizeKB = Math.round(f.size/1024);
+  const contentText = '[' + mtype.toUpperCase() + '] ' + f.name + ' (' + sizeKB + ' KB)';
+
+  // Optimistic local add — shows on radar/missions immediately
+  const newT = {
+    id: 'l' + Date.now(), text: contentText, type: itemType,
+    priority: 'normal', done: false, tags: [mtype, 'upload'],
+    ts: Date.now(), source: 'tma', external_id: extId,
+    attachment_type: mtype, attachment_url: ''
+  };
+  T.unshift(newT);
+  renderAll(); rebuildB();
+  toast('📤 خواندن فایل ' + sizeKB + ' KB...', '', 2000);
+
+  // ▶ CRITICAL: Google Sheets has a 50,000-character limit per cell.
+  // base64 encoding inflates data ~33%, so anything >35KB original size will exceed.
+  // STRATEGY:
+  //   - Images: auto-compress in browser to fit under 30KB (good quality at 800px+JPEG~0.7)
+  //   - Audio/video/docs <30KB: embed as base64
+  //   - Larger non-image: save metadata only (filename, size, mime)
+  const MAX_INLINE_SIZE = 30 * 1024; // 30KB — safely under the 50K cell limit
+  let b64data = '';
+  let attachUrl = '';
+  let savedInline = false;
+  let compressedNote = '';
+
+  // For images, try compression first
+  if (mtype === 'image' && f.type.startsWith('image/') && f.size > MAX_INLINE_SIZE) {
+    toast('🖼️ فشرده‌سازی عکس...', '', 1800);
+    try {
+      const compressed = await compressImage(f, MAX_INLINE_SIZE);
+      if (compressed) {
+        b64data = compressed.dataUrl;
+        attachUrl = b64data;
+        savedInline = true;
+        compressedNote = ' (فشرده شد: ' + Math.round(compressed.size/1024) + 'KB)';
+        slog('IMG compressed: ' + sizeKB + 'KB → ' + Math.round(compressed.size/1024) + 'KB');
+      }
+    } catch(e) {
+      slog('IMG compress fail: ' + e.message);
+    }
+  }
+
+  // For everything else (or if compression failed), embed if small
+  if (!savedInline && f.size <= MAX_INLINE_SIZE) {
+    try {
+      b64data = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = e => res(e.target.result);
+        reader.onerror = () => rej(new Error('read error'));
+        reader.readAsDataURL(f);
+      });
+      attachUrl = b64data;
+      savedInline = true;
+    } catch(e) {
+      slog('FILE READ ERR: ' + e.message);
+    }
+  } else if (!savedInline) {
+    // Too large for Sheets cell, no compression possible — metadata only
+    toast('⚠️ فایل بزرگه (' + sizeKB + 'KB) — فقط متادیتا ذخیره میشه', '', 3500);
+    slog('FILE too big for sheets cell: ' + sizeKB + 'KB');
+  }
+
+  const payload = {
+    source:          'tma',
+    external_id:     extId,
+    content:         contentText + compressedNote,
+    author:          USER_ID,
+    created_at:      new Date().toISOString(),
+    item_type:       itemType,
+    priority:        'normal',
+    tags:            [mtype, 'upload'],
+    attachment_url:  attachUrl,
+    attachment_type: mtype,
+    attachment_size: f.size,
+    attachment_text: f.name,
+    raw: {
+      via: 'tma_upload',
+      filename: f.name,
+      size: f.size,
+      mime: f.type,
+      has_data: b64data.length > 0,
+      compressed: compressedNote ? true : false
+    }
+  };
+
+  try {
+    const res = await apiFetch(API.ITEMS, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (res && res.id) newT.id = res.id;
+    newT.attachment_url = attachUrl;
+    toast('✅ ' + f.name.slice(0,28) + ' ثبت شد', 'ok');
+    HN('success');
+    burstP(window.innerWidth/2, window.innerHeight - 80);
+    slog('UPLOAD OK: ' + f.name.slice(0,25) + ' (' + sizeKB + 'KB)');
+    renderAll(); rebuildB();
+  } catch(e) {
+    // Fallback: fire-and-forget so at least Sheets gets the row
+    try {
+      await fireAndForgetPost(API.ITEMS, JSON.stringify(payload));
+      toast('📡 ' + f.name.slice(0,20) + ' فرستاده شد (no-cors)', '', 2800);
+      slog('UPLOAD via no-cors: ' + f.name.slice(0,25));
+    } catch(e2) {
+      toast('❌ آپلود ناکام: ' + e.message.slice(0,18), 'err');
+      slog('UPLOAD FAIL: ' + e.message.slice(0,30));
+    }
+  }
+}
+
+/* ══ VAULT ══ */
+function renderV(){
+  document.getElementById('vt').textContent = T.filter(t=>t.type==='task').length;
+  document.getElementById('vi2').textContent = T.filter(t=>t.type==='idea').length;
+  document.getElementById('vr').textContent = T.filter(t=>t.type==='reminder').length;
+  document.getElementById('vf').textContent = T.filter(t=>t.type==='finance').length;
+  document.getElementById('vh').textContent = T.filter(t=>t.type==='health').length;
+  document.getElementById('vn').textContent = T.filter(t=>t.type==='note').length;
+  vsrch('');
+}
+
+function vsrch(q){
+  const qq=q.toLowerCase();
+  const list = T.filter(t=>!q||t.text.toLowerCase().includes(qq)).slice(0,40);
+  document.getElementById('vrc').innerHTML = list.map(t=>`<div class="vi" onclick="gt(1,null)">
+    <div class="vit">${esc(t.text)}</div>
+    <div class="vim"><span class="vid">${t.type.toUpperCase()}</span><span class="vid">${timeAgo(t.ts)}</span></div>
+  </div>`).join('') || '<div style="text-align:center;color:rgba(155,89,255,.3);padding:20px;font-family:\'Share Tech Mono\',monospace;font-size:10px">EMPTY</div>';
+}
+
+function timeAgo(ts){
+  const d=Math.floor((Date.now()-ts)/1000);
+  if(d<60) return d+'s';
+  if(d<3600) return ~~(d/60)+'m';
+  if(d<86400) return ~~(d/3600)+'h';
+  return ~~(d/86400)+'d';
+}
+
+/* ══ INTEL BREAKDOWN ══ */
+function renderBkdn(){
+  const counts={task:0,reminder:0,idea:0,finance:0,health:0,event:0,note:0};
+  T.forEach(t=>{ if(counts[t.type]!==undefined) counts[t.type]++ });
+  const total = Math.max(1, Object.values(counts).reduce((a,b)=>a+b,0));
+  document.getElementById('bkdn').innerHTML = Object.entries(counts).filter(([,v])=>v>0).map(([k,v])=>{
+    const c=tc(k);
+    return `<div class="bkd"><div class="bkc" style="background:${c.cl};box-shadow:0 0 8px ${c.cl}"></div><div class="bkl">${k.toUpperCase()}</div><div class="bkv">${v} · ${~~(v/total*100)}%</div></div>`;
+  }).join('') || '<div class="bkl" style="text-align:center;padding:8px">NO DATA</div>';
+  document.getElementById('sk-d').textContent = STREAK;
+  document.getElementById('sk-w').textContent = T.filter(t=>t.done&&t.ts>=Date.now()-7*86400000).length;
+}
+
+/* ══ LOG ══ */
+const boots=['FENRIR GALACTIC BOOT','CONNECTING orca-9595...','GOOGLE SHEETS → LINK','REMINDER SYS → EVERY 10M','COGNITIVE CORE → STANDBY','COSMOS ENGINE → ONLINE'];
+function slog(msg){
+  const el=document.getElementById('slog'); if(!el) return;
+  const t=new Date().toTimeString().slice(0,5);
+  el.insertAdjacentHTML('afterbegin',`<div class="lr"><div class="lt">${t}</div><div class="lm">${esc(msg)}</div></div>`);
+  while(el.children.length>12) el.removeChild(el.lastChild);
+}
+
+/* ══ AI ADVISORY CARD ══ */
+const advs=[
+  'مغِز شب‌گردت بیداره. <em>کمتر از ۱ ساعت</em> تا خاموشی.',
+  'Second Brain در حال sync با <strong>orca-9595</strong>.',
+  'دو عدد <strong>high priority</strong> در صف رادار.',
+  '<em>Wolf Pack</em> در حالت تهاجمی. بترکون فرمانده.',
+  'تا پایان امروز، <strong>۳ تیر نهایی</strong> برای پاکسازی.',
+];
+function setAI(msg, typing=false){
+  const el=document.getElementById('aim');
+  el.classList.remove('typing'); el.innerHTML=msg;
+  if(typing){ el.classList.add('typing') }
+}
+setInterval(()=>{ if(curTab===0) setAI(advs[~~(Math.random()*advs.length)]) }, 9000);
+setTimeout(()=>setAI(advs[0]), 1400);
+
+/* ══ OPS BUTTONS ══ */
+async function opDaily(btn) {
+  if (btn.classList.contains('loading')) return;
+  btn.classList.add('loading'); H('medium');
+  openRp('\ud83d\udcca \u06af\u0632\u0627\u0631\u0634 \u0631\u0648\u0632\u0627\u0646\u0647 AI', '\u062f\u0631 \u062d\u0627\u0644 \u062f\u0631\u06cc\u0627\u0641\u062a \u0627\u0632 Google Sheets...');
+  try {
+    // Step 1: fetch last 24h from Sheets
+    const d = await apiFetch(API.ITEMS + '?since_hours=24');
+    let items = [];
+    items = unwrapItems(d);
+    slog('DAILY: fetched ' + items.length + ' items from Sheets');
+
+    // Step 2: send to AI summarize (ai/summarize webhook)
+    const sumRes = await apiFetch(API.SUMMARY, {
+      method: 'POST',
+      body: JSON.stringify({
+        period: 'daily',
+        items: items,
+        stats: {
+          total_items: items.length,
+          by_priority: {
+            high:   items.filter(x => x.priority==='high').length,
+            normal: items.filter(x => x.priority==='normal').length,
+            low:    items.filter(x => x.priority==='low').length,
+          }
+        }
+      })
+    });
+    const report = sumRes.summary || sumRes.text || sumRes.report || sumRes.response || '\u06af\u0632\u0627\u0631\u0634 \u062e\u0627\u0644\u06cc \u0628\u0648\u062f.';
+    openRp('\ud83d\udcca \u06af\u0632\u0627\u0631\u0634 \u0631\u0648\u0632\u0627\u0646\u0647 AI (Fenrir)', report);
+    slog('DAILY REPORT: OK (' + items.length + ' items)');
+    toast('\u2705 \u06af\u0632\u0627\u0631\u0634 \u0622\u0645\u0627\u062f\u0647', 'ok');
+  } catch(e) {
+    // Local fallback using T array
+    const hi = T.filter(t=>t.priority==='high'&&!t.done);
+    const all_active = T.filter(t=>!t.done);
+    openRp('\ud83d\udcca \u06af\u0632\u0627\u0631\u0634 \u0631\u0648\u0632\u0627\u0646\u0647 (\u0645\u062d\u0644\u06cc)',
+      '\ud83d\udcca \u06af\u0632\u0627\u0631\u0634 \u0631\u0648\u0632\u0627\u0646\u0647 (\u0628\u062f\u0648\u0646 \u0627\u062a\u0635\u0627\u0644 AI)\n\n' +
+      '\ud83d\udd34 \u0641\u0648\u0631\u06cc: ' + hi.length + '\n\ud83c\udfe6 \u0641\u0639\u0627\u0644: ' + all_active.length + '\n' +
+      hi.slice(0,5).map(t=>'\u2022 '+t.text).join('\n') + '\n\n\u26a0\ufe0f AI \u0622\u0641\u0644\u0627\u06cc\u0646');
+    toast('\u26a0\ufe0f AI \u0622\u0641\u0644\u0627\u06cc\u0646 \u2014 \u0645\u062d\u0644\u06cc', '', 3000);
+    slog('DAILY REPORT: offline fallback');
+  }
+  btn.classList.remove('loading');
+}
+
+async function opWeekly(btn) {
+  if (btn.classList.contains('loading')) return;
+  btn.classList.add('loading'); H('medium');
+  openRp('\ud83d\udcc8 \u06af\u0632\u0627\u0631\u0634 \u0647\u0641\u062a\u06af\u06cc', '\u062f\u0631 \u062d\u0627\u0644 \u062a\u062d\u0644\u06cc\u0644 \u0647\u0641\u062a\u0647 \u0627\u0632 Sheets...');
+  try {
+    const d = await apiFetch(API.ITEMS + '?since_hours=168');
+    let items = [];
+    items = unwrapItems(d);
+    slog('WEEKLY: fetched ' + items.length + ' items');
+
+    const sumRes = await apiFetch(API.SUMMARY, {
+      method: 'POST',
+      body: JSON.stringify({
+        period: 'weekly',
+        items: items,
+        stats: {
+          total_items: items.length,
+          by_priority: {
+            high:   items.filter(x => x.priority==='high').length,
+            normal: items.filter(x => x.priority==='normal').length,
+            low:    items.filter(x => x.priority==='low').length,
+          }
+        }
+      })
+    });
+    const report = sumRes.summary || sumRes.text || sumRes.report || sumRes.response || '\u06af\u0632\u0627\u0631\u0634 \u062e\u0627\u0644\u06cc.';
+    openRp('\ud83d\udcc8 \u06af\u0632\u0627\u0631\u0634 \u0647\u0641\u062a\u06af\u06cc Wolf Pack', report);
+    slog('WEEKLY REPORT: OK (' + items.length + ' items)');
+    toast('\ud83d\udcca \u0647\u0641\u062a\u06af\u06cc \u0622\u0645\u0627\u062f\u0647', 'ok');
+  } catch(e) {
+    const doneW = T.filter(t=>t.done&&t.ts>=Date.now()-7*86400000).length;
+    openRp('\ud83d\udcc8 \u0647\u0641\u062a\u06af\u06cc (\u0645\u062d\u0644\u06cc)',
+      '\ud83d\udcc8 \u0647\u0641\u062a\u0647 Wolf Pack\n\n\u2705 \u0627\u0646\u062c\u0627\u0645 \u0634\u062f\u0647: '+doneW+'\n\ud83c\udfaf \u06a9\u0644: '+T.length+'\n\ud83d\udd25 Streak: '+STREAK+' \u0631\u0648\u0632\n\n\u26a0\ufe0f AI \u0622\u0641\u0644\u0627\u06cc\u0646');
+    toast('\u26a0\ufe0f AI \u0622\u0641\u0644\u0627\u06cc\u0646', '', 3000);
+  }
+  btn.classList.remove('loading');
+}
+
+async function opScout(btn) {
+  if (btn.classList.contains('loading')) return;
+  btn.classList.add('loading'); H('medium');
+  openRp('\ud83d\udee9\ufe0f \u067e\u0647\u067e\u0627\u062f \u0634\u0646\u0627\u0633\u0627\u06cc\u06cc', '\u062f\u0631 \u062d\u0627\u0644 \u0627\u0633\u06a9\u0646 \u062a\u0633\u06a9\u200c\u0647\u0627\u06cc \u06f2\u06f4 \u0633\u0627\u0639\u062a \u0627\u062e\u06cc\u0631...');
+  try {
+    // Fetch 24h tasks from Sheets
+    const d = await apiFetch(API.ITEMS + '?since_hours=24');
+    let items = [];
+    items = unwrapItems(d);
+
+    const tasks = items.filter(it => (it.item_type||it.type) === 'task');
+    slog('SCOUT: ' + tasks.length + ' tasks in 24h');
+
+    // Send to summarize as scout report
+    const sumRes = await apiFetch(API.SUMMARY, {
+      method: 'POST',
+      body: JSON.stringify({
+        period: 'daily',
+        items: tasks,
+        stats: { total_items: tasks.length, label: 'scout_drone_report' }
+      })
+    });
+    const report = sumRes.summary || sumRes.text || sumRes.report ||
+      ('\u26a1\ufe0f \u06af\u0632\u0627\u0631\u0634 \u067e\u0647\u067e\u0627\u062f\n' + tasks.length + ' \u0647\u062f\u0641 \u062f\u0631 \u0631\u0627\u062f\u0627\u0631.');
+    openRp('\ud83d\udee9\ufe0f Scout Drone Report', report);
+    slog('SCOUT DRONE: complete');
+    toast('\ud83c\udfaf \u067e\u0647\u067e\u0627\u062f \u0641\u0631\u0648\u062f \u0627\u0648\u0645\u062f', 'ok');
+  } catch(e) {
+    const tasks = T.filter(t=>t.type==='task'&&!t.done);
+    openRp('\ud83d\udee9\ufe0f Scout (\u0645\u062d\u0644\u06cc)',
+      '\u26a1\ufe0f \u06af\u0632\u0627\u0631\u0634 \u0634\u0646\u0627\u0633\u0627\u06cc\u06cc\n\n\ud83d\udcca \u0648\u0636\u0639\u06cc\u062a \u0631\u0627\u062f\u0627\u0631: ' + tasks.length + ' \u0647\u062f\u0641 \u0645\u0639\u0648\u0642\u0647\n\n' +
+      tasks.slice(0,10).map(t=>'\ud83c\udfaf '+t.text).join('\n') + '\n\n\u26a0\ufe0f \u0627\u062a\u0635\u0627\u0644 \u0636\u0639\u06cc\u0641');
+    toast('\u26a0\ufe0f \u0633\u06cc\u06af\u0646\u0627\u0644 \u0636\u0639\u06cc\u0641', '', 3000);
+  }
+  btn.classList.remove('loading');
+}
+
+async function opSync(btn) {
+  if (btn.classList.contains('loading')) return;
+  btn.classList.add('loading'); H();
+  slog('MANUAL SYNC initiated');
+  await loadLive();
+  btn.classList.remove('loading');
+  toast('\ud83d\udd04 \u0647\u0645\u06af\u0627\u0645\u200c\u0633\u0627\u0632\u06cc \u06a9\u0627\u0645\u0644', 'ok');
+}
+
+/* ══ DIAGNOSE — tests each CORS proxy IN PARALLEL against the live n8n endpoint ══
+   Shows exactly which proxy works and reports the first row from /items.
+   This is the truth-teller: if all fail, the issue is server-side or network-level. */
+async function diagnose(btn) {
+  if (btn.classList.contains('loading')) return;
+  btn.classList.add('loading');
+  H('medium');
+  openRp('🔬 Diagnostic Report', 'در حال اجرای ' + PROXIES.length + ' تست به موازات...\nهر کدوم تا ۱۰ ثانیه time-out داره.\n\n⏳ صبر کن...');
+
+  const testUrl = N8N + '/items?since_hours=24';
+
+  // First test: a sanity check against a known-good public API to verify network works at all
+  let networkOk = true;
+  let networkErr = '';
+  try {
+    const r = await Promise.race([
+      fetch('https://api.github.com/zen', { method: 'GET', cache: 'no-store' }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000))
+    ]);
+    if (!r.ok) { networkOk = false; networkErr = 'HTTP ' + r.status; }
+  } catch(e) {
+    networkOk = false;
+    networkErr = e.message.slice(0, 50);
+  }
+
+  // Run all proxy tests in parallel with timeout
+  const testProxy = async (proxy) => {
+    const proxied = proxy.build(testUrl);
+    const start = Date.now();
+    try {
+      const r = await Promise.race([
+        fetch(proxied, { method: 'GET', mode: 'cors', cache: 'no-store' }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout (10s)')), 10000))
+      ]);
+      const ms = Date.now() - start;
+      if (!r.ok) return { proxy, ok: false, status: 'HTTP ' + r.status, ms, error: 'bad status' };
+      const txt = await r.text();
+      let rows = '?';
+      try {
+        const j = JSON.parse(txt);
+        rows = Array.isArray(j.items) ? j.items.length : (Array.isArray(j) ? j.length : 0);
+      } catch(_) {
+        return { proxy, ok: false, status: 'HTTP 200', ms, error: 'non-JSON response (text was: ' + txt.slice(0,30) + '...)' };
+      }
+      return { proxy, ok: true, status: 'HTTP 200', ms, rows };
+    } catch(e) {
+      return { proxy, ok: false, status: '—', ms: Date.now() - start, error: e.message.slice(0, 70) };
+    }
+  };
+
+  const results = await Promise.all(PROXIES.map(testProxy));
+
+  // Find first working proxy and remember it
+  const firstWorking = results.findIndex(r => r.ok);
+  if (firstWorking >= 0) {
+    WORKING_PROXY_IDX = firstWorking;
+    try { localStorage.setItem('lifeops_proxy_idx', String(firstWorking)); } catch(_) {}
+  }
+
+  // Build report
+  const lines = [];
+  lines.push('🔬 LifeOps Connectivity Diagnostic');
+  lines.push('════════════════════════════════════');
+  lines.push('');
+  lines.push('🌐 Network test (api.github.com):');
+  lines.push('   ' + (networkOk ? '✅ شبکه فعاله' : '❌ شبکه قطعه: ' + networkErr));
+  lines.push('');
+  lines.push('🔗 Proxy tests (' + PROXIES.length + ' total):');
+  for (const r of results) {
+    const icon = r.ok ? '✅' : '❌';
+    const name = r.proxy.name.padEnd(14, ' ');
+    lines.push(icon + ' ' + name + '| ' + r.status.padEnd(10, ' ') + '| ' + r.ms + 'ms');
+    if (r.ok) lines.push('   └─ ' + r.rows + ' رکورد دریافت شد');
+    if (r.error) lines.push('   └─ خطا: ' + r.error);
+  }
+  lines.push('');
+  lines.push('════════════════════════════════════');
+  lines.push('📊 خلاصه:');
+  const okCount = results.filter(r => r.ok).length;
+  lines.push('   ' + okCount + ' از ' + PROXIES.length + ' proxy جواب می‌ده');
+  if (okCount > 0) {
+    lines.push('   ✓ Proxy فعال: ' + PROXIES[WORKING_PROXY_IDX].name);
+  }
+  lines.push('   آیتم‌های لود شده: ' + T.length);
+  lines.push('   Browser: ' + (window.Telegram?.WebApp ? 'Telegram Mini App' : 'Standard'));
+  lines.push('   Origin: ' + (location.origin || 'file://'));
+  lines.push('');
+  lines.push('🔧 پیشنهاد:');
+  if (!networkOk) {
+    lines.push('   ⚠️ اینترنت اصلاً کار نمی‌کنه. VPN رو چک کن.');
+  } else if (okCount === 0) {
+    lines.push('   ⚠️ شبکه فعاله ولی همه‌ی proxyها بلاک شدن.');
+    lines.push('   احتمالاً:');
+    lines.push('     • ISP این سرویس‌ها رو فیلتر کرده');
+    lines.push('     • Telegram Mini App با CSP محدود کرده');
+    lines.push('     • همه proxyها از ایران بلاک شدن');
+    lines.push('   راه‌حل: یه VPN فعال کن یا یک Cloudflare Worker شخصی بساز.');
+    lines.push('   فعلاً اپ به حالت محلی (offline-write) کار می‌کنه.');
+  } else {
+    lines.push('   ✓ اپ آماده‌ست. روی رادار آیتم‌ها میان.');
+  }
+
+  // ▶ LIVE PUT TEST — if we have at least one item, attempt to mark it done and back
+  // This reveals whether the proxy actually forwards PUT bodies correctly to n8n.
+  lines.push('');
+  lines.push('🧪 Live PUT test:');
+  if (T.length === 0) {
+    lines.push('   ⚠️ هیچ آیتمی نیست برای تست. اول یه چیزی بنویس.');
+  } else {
+    // Pick the first non-done item, or the first item if all done
+    const target = T.find(t => !t.done) || T[0];
+    const url = API.ITEMS + '/' + target.id;
+    const origTags = (target.tags || []).filter(x => x !== 'done' && x !== 'test_ping');
+    const testTags = [...origTags, 'test_ping'];
+    lines.push('   آیتم تست: ' + (target.text || '(empty)').slice(0, 30));
+    lines.push('   ID: ' + target.id);
+
+    try {
+      const startMs = Date.now();
+      const putRes = await apiFetch(url, {
+        method: 'PUT',
+        body: JSON.stringify({
+          id: target.id, source: target.source || 'tma',
+          external_id: target.external_id || target.id,
+          content: target.text, author: USER_ID,
+          created_at: new Date(target.ts).toISOString(),
+          item_type: target.type, priority: target.priority,
+          tags: testTags, attachment_url: '',
+          attachment_type: '', attachment_size: 0, attachment_text: '',
+          updated_at: new Date().toISOString()
+        })
+      });
+      const putMs = Date.now() - startMs;
+      lines.push('   ✅ PUT succeeded (' + putMs + 'ms): ' + JSON.stringify(putRes).slice(0, 80));
+
+      // Wait for sheets to settle, then re-fetch to verify
+      await new Promise(r => setTimeout(r, 1500));
+      const verify = await apiFetch(API.ITEMS + '?source=' + encodeURIComponent(target.source||'tma') + '&external_id=' + encodeURIComponent(target.external_id||target.id));
+      const verifyItems = unwrapItems(verify);
+      const verifiedRow = verifyItems.find(it => String(it.id) === String(target.id));
+      if (verifiedRow) {
+        const tagsStr = String(verifiedRow.tags_json || '');
+        if (tagsStr.includes('test_ping')) {
+          lines.push('   ✅ Verified: tags now include "test_ping" ✓');
+          lines.push('   🎉 PUT کار میکنه — تیک‌ها باید سیو شن!');
+        } else {
+          lines.push('   ❌ PUT خوب جواب داد ولی tags update نشد');
+          lines.push('      tags فعلی: ' + tagsStr.slice(0, 100));
+        }
+      } else {
+        lines.push('   ⚠️ آیتم بعد از PUT پیدا نشد (verify failed)');
+      }
+
+      // Cleanup: revert the test tag
+      await apiFetch(url, {
+        method: 'PUT',
+        body: JSON.stringify({
+          id: target.id, source: target.source || 'tma',
+          external_id: target.external_id || target.id,
+          content: target.text, author: USER_ID,
+          created_at: new Date(target.ts).toISOString(),
+          item_type: target.type, priority: target.priority,
+          tags: origTags, attachment_url: '',
+          attachment_type: '', attachment_size: 0, attachment_text: '',
+          updated_at: new Date().toISOString()
+        })
+      }).catch(_ => {});
+    } catch(e) {
+      lines.push('   ❌ PUT failed: ' + e.message.slice(0, 80));
+    }
+  }
+
+  openRp('🔬 Diagnostic Report', lines.join('\n'));
+  btn.classList.remove('loading');
+  const psEl = document.getElementById('proxy-status');
+  if (psEl) psEl.textContent = PROXIES[WORKING_PROXY_IDX]?.name || '?';
+}
+
+function openModal() {
+  const el = document.getElementById('remModal');
+  el.classList.add('show');
+  // Set default to +1h from now in local time
+  const dt = new Date(Date.now() + 3600000);
+  const pad = n => String(n).padStart(2,'0');
+  const localStr = dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate())+'T'+pad(dt.getHours())+':'+pad(dt.getMinutes());
+  document.getElementById('rem-date').value = localStr;
+  H();
+}
+function closeModal(){ document.getElementById('remModal').classList.remove('show') }
+function openRp(ttl,body){ document.getElementById('rp-ttl').textContent=ttl; document.getElementById('rp-body').textContent=body; document.getElementById('rpModal').classList.add('show'); H() }
+function closeRpModal(){ document.getElementById('rpModal').classList.remove('show') }
+
+async function submitReminder() {
+  const text = document.getElementById('rem-text').value.trim();
+  const dtLocal = document.getElementById('rem-date').value;
+  const prio = document.getElementById('rem-prio').value;
+
+  if (!text) { toast('\u274c \u0645\u062a\u0646 \u06cc\u0627\u062f\u0622\u0648\u0631 \u0631\u0648 \u0628\u0646\u0648\u06cc\u0633', 'err'); return; }
+  if (!dtLocal) { toast('\u274c \u0632\u0645\u0627\u0646 \u0631\u0648 \u0627\u0646\u062a\u062e\u0627\u0628 \u06a9\u0646', 'err'); return; }
+
+  const dtObj = new Date(dtLocal);
+  if (isNaN(dtObj.getTime())) { toast('\u274c \u062a\u0627\u0631\u06cc\u062e \u0645\u0639\u062a\u0628\u0631 \u0646\u06cc\u0633\u062a', 'err'); return; }
+  if (dtObj <= new Date()) { toast('\u274c \u0632\u0645\u0627\u0646 \u0628\u0627\u06cc\u062f \u062f\u0631 \u0622\u06cc\u0646\u062f\u0647 \u0628\u0627\u0634\u062f', 'err'); return; }
+
+  H('medium');
+  closeModal();
+
+  // Optimistic local add
+  const extId = 'rem_' + Date.now();
+  const newT = {
+    id: extId, text: text, type: 'reminder', priority: prio,
+    done: false, tags: ['reminder', 'scheduled'], ts: Date.now(),
+    source: 'tma', external_id: extId,
+  };
+  T.unshift(newT); renderAll(); rebuildB();
+
+  try {
+    // SSA Reminder Receiver v2 — exact required fields:
+    // user_id (string), reminder_text, datetime (UTC ISO string), priority, source
+    const utcISO = dtObj.toISOString();
+    const res = await apiFetch(API.REMINDER, {
+      method: 'POST',
+      body: JSON.stringify({
+        user_id: USER_ID,
+        reminder_text: text,
+        datetime: utcISO,
+        priority: prio,
+        source: 'tma'
+      })
+    });
+
+    if (res && res.success === false) {
+      toast('\u274c ' + (res.error || '\u062e\u0637\u0627 \u062f\u0631 \u062b\u0628\u062a'), 'err');
+      slog('REMINDER ERR: ' + (res.error || '?'));
+    } else {
+      toast('\u2705 \u06cc\u0627\u062f\u0622\u0648\u0631 \u062f\u0631 Sheets \u062b\u0628\u062a \u0634\u062f', 'ok');
+      HN('success');
+      burstP(window.innerWidth/2, window.innerHeight/2);
+      slog('REMINDER SAVED: ' + text.slice(0,30));
+    }
+  } catch(e) {
+    // Fallback to fire-and-forget so reminder still gets to n8n + bot still notifies
+    const reminderBody = JSON.stringify({
+      user_id: USER_ID, reminder_text: text, datetime: dtObj.toISOString(),
+      priority: prio, source: 'tma'
+    });
+    try {
+      await fireAndForgetPost(API.REMINDER, reminderBody);
+      toast('📡 یادآور با no-cors ارسال شد', '', 2800);
+      slog('REMINDER via no-cors: ' + text.slice(0,25));
+    } catch(_) {
+      toast('⚠️ یادآور فقط محلی ذخیره شد');
+      slog('REMINDER FAIL: ' + e.message.slice(0,30));
+    }
+  }
+  document.getElementById('rem-text').value = '';
+}
+
+function opClassifyModal(btn){
+  const text=prompt('متن برای تحلیل AI:'); if(!text) return;
+  btn.classList.add('loading'); H();
+  apiFetch(API.CLASSIFY, { method:'POST', body:JSON.stringify({content:text, source:'tma', user_id:USER_ID}) })
+    .then(d=>{
+      openRp('🧠 AI Classify', `TYPE: ${d.item_type}\nPRIORITY: ${d.priority}\nTAGS: ${(d.tags||[]).join(', ')}\n\n${d.assistant_message||''}`);
+      btn.classList.remove('loading');
+    }).catch(()=>{
+      openRp('🧠 AI Classify','⚠️ خطا در تحلیل');
+      btn.classList.remove('loading');
+    });
+}
+
+async function opClr(){
+  const doneItems = T.filter(t => t.done);
+  if (doneItems.length === 0) {
+    toast('هیچ ماموریت تموم‌شده‌ای نیست', '', 2200);
+    return;
+  }
+  H('heavy');
+  toast('🗑️ پاکسازی ' + doneItems.length + ' ماموریت...', '', 2000);
+
+  // ▶ Persist archive state to server BEFORE removing from local list.
+  // We add the 'archived' tag — loadLive filters items with this tag.
+  // Done in parallel for speed; failures are logged but not blocking.
+  const archivePromises = doneItems
+    .filter(t => t.source !== 'demo' && t.id && !String(t.id).startsWith('l') && !String(t.id).startsWith('d'))
+    .map(t => {
+      const archivedTags = [...new Set([...(t.tags || []).filter(x => x !== 'done'), 'archived'])];
+      return apiFetch(API.ITEMS + '/' + t.id, {
+        method: 'PUT',
+        body: JSON.stringify({
+          id: t.id, source: t.source || 'tma',
+          external_id: t.external_id || t.id,
+          content: t.text, author: USER_ID,
+          created_at: new Date(t.ts).toISOString(),
+          item_type: t.type, priority: t.priority,
+          tags: archivedTags,
+          attachment_url: t.attachment_url || '',
+          attachment_type: t.attachment_type || '',
+          attachment_size: 0, attachment_text: '',
+          updated_at: new Date().toISOString()
+        })
+      }).catch(e => {
+        slog('ARCHIVE FAIL ' + t.id + ': ' + e.message.slice(0,18));
+        return null;
+      });
+    });
+
+  // Remove locally — instant UX feedback. Also mark them archived in localStorage
+  // so they never reappear even if the server-side PUT fails.
+  for (const t of doneItems) {
+    setLocalItemState(t.id, 'archived');
+  }
+  const before = T.length;
+  T = T.filter(t => !t.done);
+  renderAll(); rebuildB();
+
+  // Wait for archive PUTs in background
+  const results = await Promise.all(archivePromises);
+  const okCount = results.filter(r => r !== null).length;
+  toast('✅ ' + (before - T.length) + ' ماموریت پاک شد (' + okCount + ' در سرور آرشیو شد)', 'ok', 3000);
+}
+
+/* ══ PROFILE ══ */
+function editBio(el){
+  if(el.contentEditable==='true') return;
+  el.contentEditable='true'; el.focus();
+  el.onblur=async()=>{
+    el.contentEditable='false';
+    const bio=el.innerText.trim();
+    try {
+      await apiFetch(API.PROFILE, {method:'POST',body:JSON.stringify({user_id:USER_ID, bio})});
+      toast('✅ بیو ذخیره شد','ok');
+    } catch(e) { /* silent */ }
+  };
+}
+
+function uploadAvatar(inp){
+  const f=inp.files?.[0]; if(!f) return;
+  toast('📤 آپلود آواتار...');
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const dataUrl = e.target.result;
+    document.getElementById('uav').innerHTML=`<img src="${dataUrl}">`;
+    // Save locally so it persists across reloads in same browser
+    try { localStorage.setItem('lifeops_avatar', dataUrl); } catch(_) {}
+    // Also send to vault (CORS-safe JSON via apiFetch wrapper)
+    try {
+      await apiFetch(API.ITEMS, {
+        method: 'POST',
+        body: JSON.stringify({
+          source: 'tma_avatar',
+          external_id: 'avatar_' + Date.now(),
+          content: '[AVATAR upload]',
+          author: USER_ID,
+          created_at: new Date().toISOString(),
+          item_type: 'image',
+          priority: 'low',
+          tags: ['avatar','profile'],
+          attachment_url: dataUrl,
+          attachment_type: 'image',
+          attachment_size: f.size,
+          attachment_text: f.name,
+          raw: { kind: 'avatar' }
+        })
+      });
+      toast('👑 آواتار بروز شد','ok');
+    } catch(_) { toast('⚠️ آواتار محلی ذخیره شد', '', 2500); }
+  };
+  reader.readAsDataURL(f);
+  inp.value='';
+}
+
+/* ════════════════════════════════════
+   AI CHAT PANEL (Fenrir conversation)
+   ════════════════════════════════════ */
+let aiAttachFile=null, aiRec=null, aiChunks=[];
+function openAI(){
+  document.getElementById('aipanel').classList.add('show');
+  if(document.getElementById('ailog').children.length===0){
+    aiMsg('b','سلام فرمانده 🐺 چی تو سرت می‌گذره؟ هرچی بگی ثبت و تحلیل می‌کنم. می‌تونی پیام بدی، ویس بفرستی، یا فایل ضمیمه کنی.');
+  }
+  H();
+}
+function closeAI(){ document.getElementById('aipanel').classList.remove('show'); if(aiRec){ aiStopRec() } }
+
+function aiMsg(who, text, extra){
+  const log=document.getElementById('ailog');
+  const d=document.createElement('div');
+  d.className='aimsg '+who;
+  if(extra && extra.tag){ d.innerHTML=`<span class="mtag">${extra.tag}</span> ${esc(text)}` }
+  else d.textContent=text;
+  log.appendChild(d);
+  log.scrollTop=log.scrollHeight;
+  return d;
+}
+function aiTyping(on){
+  const log=document.getElementById('ailog');
+  let t=document.getElementById('ai-typ');
+  if(on && !t){
+    t=document.createElement('div'); t.id='ai-typ'; t.className='aityp';
+    t.innerHTML='<span></span><span></span><span></span>';
+    log.appendChild(t); log.scrollTop=log.scrollHeight;
+  } else if(!on && t) t.remove();
+}
+
+async function aiSend() {
+  const inp = document.getElementById('aii');
+  const text = inp.value.trim();
+  if (!text && !aiAttachFile) return;
+  if (text) aiMsg('u', text);
+  inp.value = '';
+  H('light');
+  aiTyping(true);
+
+  const extId = 'tma_chat_' + Date.now();
+
+  try {
+    // ══ STRATEGY ══
+    // The full Fenrir assistant_message is generated by the Cognitive Core,
+    // which is invoked by Scout Drone via the INBOUND webhook.
+    // /ai/classify only returns item_type+priority+tags, NOT assistant_message.
+    //
+    // FLOW for in-app chat:
+    // 1. POST to INBOUND → Scout Drone fires, Cognitive Core runs, writes assistant_message
+    //    into Sheets row's raw_json field (and also replies via Telegram bot).
+    // 2. Wait ~5s, then GET /items?source=tma_chat&external_id=<id> to fetch our row.
+    // 3. Parse raw_json.assistant_message → show it in the panel.
+    //
+    // The Telegram echo is a side-effect we can't easily prevent without editing n8n,
+    // but the user sees the reply IN THE APP first (the goal).
+
+    let attachmentMeta = { url:'', type:'', size:0, text:'' };
+    if (aiAttachFile) {
+      const f = aiAttachFile;
+      attachmentMeta.type = f.type.startsWith('image/') ? 'image'
+                          : f.type.startsWith('audio/') ? 'voice' : 'document';
+      attachmentMeta.size = f.size;
+      attachmentMeta.text = f.name;
+      if (f.size <= 4 * 1024 * 1024) {
+        try {
+          attachmentMeta.url = await new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = e => res(e.target.result);
+            r.onerror = () => rej(new Error('read'));
+            r.readAsDataURL(f);
+          });
+        } catch(_) {}
+      }
+    }
+
+    const contentText = text || ('[' + attachmentMeta.type + '] ' + attachmentMeta.text);
+
+    // Step 1: fire to INBOUND so Cognitive Core processes it
+    //   The Scout Drone "Normalize" node accepts payloads that either have a
+    //   `message` object (Telegram-shaped) OR direct top-level fields.
+    apiFetch(API.INBOUND, {
+      method: 'POST',
+      body: JSON.stringify({
+        source: 'tma_chat',
+        external_id: extId,
+        content: contentText,
+        author: USER_ID,
+        created_at: new Date().toISOString(),
+        message: {
+          message_id: Date.now(),
+          text: contentText,
+          date: Math.floor(Date.now()/1000),
+          from: { id: parseInt(USER_ID)||5953981409, username: 'tma_user', first_name: 'Commander' },
+          chat: { id: parseInt(USER_ID)||5953981409 }
+        }
+      })
+    }).catch(e => slog('INBOUND fail: ' + e.message.slice(0,20)));
+
+    // Step 2: poll /items for the row that has our external_id (max 8 tries × 1.5s = 12s)
+    let assistantReply = null;
+    let classification = null;
+    for (let i = 0; i < 8; i++) {
+      await new Promise(r => setTimeout(r, 1500));
+      try {
+        const polled = await apiFetch(API.ITEMS + '?source=tma_chat&external_id=' + encodeURIComponent(extId));
+        const items = unwrapItems(polled);
+        if (items.length > 0) {
+          const row = items[0];
+          let raw = {};
+          try { raw = JSON.parse(row.raw_json || '{}'); } catch(_) {}
+          if (raw.assistant_message) {
+            assistantReply = raw.assistant_message;
+            classification = { item_type: row.item_type, priority: row.priority, tags: row.tags_json };
+            break;
+          }
+        }
+      } catch(_) {}
+    }
+
+    aiTyping(false);
+
+    if (assistantReply) {
+      aiMsg('b', assistantReply, classification?.item_type ? { tag: classification.item_type.toUpperCase() } : null);
+      HN('success');
+    } else {
+      // Fallback: try /ai/classify just to get a classification + acknowledgement
+      try {
+        const c = await apiFetch(API.CLASSIFY, {
+          method: 'POST',
+          body: JSON.stringify({ content: contentText, source: 'tma_chat', user_id: USER_ID })
+        });
+        classification = c;
+        const fallback = c.summary || ('پیامت ثبت شد فرمانده — نوع: ' + (c.item_type||'note').toUpperCase() + '. پاسخ کامل از Cognitive Core در راهه. 🐺');
+        aiMsg('b', fallback, c.item_type ? { tag: c.item_type.toUpperCase() } : null);
+      } catch(_) {
+        aiMsg('b', 'پیامت ارسال شد فرمانده 🐺 (پاسخ Cognitive Core الان نیومد — رفرش کن تا بیاد)');
+      }
+    }
+
+    // Step 3: optimistic local add — appears on radar instantly
+    if (text || aiAttachFile) {
+      T.unshift({
+        id: extId,
+        text: contentText,
+        type: (classification?.item_type) || 'note',
+        priority: (classification?.priority) || 'normal',
+        done: false,
+        tags: parseTags(classification?.tags),
+        ts: Date.now(),
+        source: 'tma_chat', external_id: extId,
+        attachment_url: attachmentMeta.url,
+        attachment_type: attachmentMeta.type,
+      });
+      renderAll(); rebuildB();
+    }
+
+  } catch(e) {
+    aiTyping(false);
+    aiMsg('b', '⚠️ خطای شبکه. پیام محلی ذخیره شد.');
+    if (text) {
+      T.unshift({
+        id: extId, text, type: 'note', priority: 'normal', done: false,
+        tags: ['chat','offline'], ts: Date.now(), source: 'offline', external_id: extId
+      });
+      renderAll(); rebuildB();
+    }
+  }
+  aiAttachFile = null;
+  const chip = document.getElementById('ai-attach-chip');
+  if (chip) chip.remove();
+}
+
+function aiAttach(inp){
+  const f=inp.files?.[0]; if(!f) return;
+  aiAttachFile=f;
+  toast('📎 '+f.name+' ضمیمه شد','ok');
+  inp.value='';
+  // Show a removable chip in the input bar so the user knows it's attached
+  const bar = document.getElementById('aiibar');
+  let chip = document.getElementById('ai-attach-chip');
+  if (!chip) {
+    chip = document.createElement('div');
+    chip.id = 'ai-attach-chip';
+    chip.className = 'ai-attach-chip';
+    bar.insertBefore(chip, bar.firstChild);
+  }
+  const isImg = f.type.startsWith('image/');
+  const icon = isImg ? '🖼️' : f.type.startsWith('audio/') ? '🎵' : '📄';
+  chip.innerHTML = icon + ' ' + esc(f.name).slice(0,22) + ' <span class="x">×</span>';
+  chip.querySelector('.x').onclick = () => { aiAttachFile=null; chip.remove(); };
+}
+
+async function aiToggleMic(){
+  const btn=document.getElementById('aim-mic');
+  if(aiRec){
+    aiStopRec();
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    aiRec = new MediaRecorder(stream);
+    aiChunks=[];
+    aiRec.ondataavailable = e => aiChunks.push(e.data);
+    aiRec.onstop = async () => {
+      const blob = new Blob(aiChunks, {type: aiRec.mimeType || 'audio/webm'});
+      stream.getTracks().forEach(t=>t.stop());
+      aiRec=null;
+      btn.classList.remove('rec'); btn.textContent='🎙';
+      aiTyping(true);
+      toast('🎙 ارسال ویس...');
+      // Convert to base64 — safer for CORS than multipart
+      let b64 = '';
+      try {
+        b64 = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result);
+          r.onerror = () => rej(new Error('read'));
+          r.readAsDataURL(blob);
+        });
+      } catch(_) {}
+      // Show user message bubble for context
+      aiMsg('u', '🎙 پیام صوتی (' + Math.round(blob.size/1024) + ' KB)');
+      try {
+        // Send to CLASSIFY with audio data — n8n side can pipe to Whisper if configured
+        const res = await apiFetch(API.CLASSIFY, {
+          method: 'POST',
+          body: JSON.stringify({
+            content: '[VOICE]',
+            source: 'tma_voice',
+            user_id: USER_ID,
+            audio_data: b64,
+            audio_mime: blob.type,
+            audio_size: blob.size
+          })
+        });
+        aiTyping(false);
+        if (res.transcript) aiMsg('u', '🎙 ' + res.transcript);
+        const reply = res.assistant_message || res.reply || res.response || res.summary || 'ویس دریافت شد. متن استخراج‌شده: ' + (res.transcript || '—') + ' 🐺';
+        aiMsg('b', reply, res.item_type ? { tag: res.item_type.toUpperCase() } : null);
+        // Persist to vault
+        apiFetch(API.ITEMS, {
+          method: 'POST',
+          body: JSON.stringify({
+            source: 'tma_voice',
+            external_id: 'v_' + Date.now(),
+            content: res.transcript || '[VOICE message]',
+            author: USER_ID,
+            created_at: new Date().toISOString(),
+            item_type: res.item_type || 'voice',
+            priority: res.priority || 'normal',
+            tags: ['voice'],
+            attachment_url: b64,
+            attachment_type: 'voice',
+            attachment_size: blob.size,
+            attachment_text: 'voice_' + Date.now() + '.webm',
+            raw: { via: 'ai_panel_mic', assistant_message: reply }
+          })
+        }).catch(()=>{});
+        HN('success');
+      } catch(e) {
+        aiTyping(false);
+        aiMsg('b','⚠️ تبدیل ویس ناکام. CORS یا مسیر AI? دوباره امتحان کن.');
+      }
+    };
+    aiRec.start();
+    btn.classList.add('rec'); btn.textContent='⏹';
+    toast('🎙 در حال ضبط... دوباره بزن تا متوقف بشه');
+    H('heavy');
+  } catch(e) {
+    toast('❌ دسترسی میکروفون نیست','err');
+  }
+}
+function aiStopRec(){ if(aiRec && aiRec.state!=='inactive') aiRec.stop() }
+
+/* ══ POLL BOT MESSAGES — fetch new items/bot responses from Sheets ══ */
+let lastPollTs = Date.now() - 300000;
+async function pollBotMessages() {
+  const btn = document.getElementById('ai-poll-btn');
+  if (btn) btn.style.opacity = '0.4';
+  try {
+    const sinceHours = Math.max(0.1, (Date.now() - lastPollTs) / 3600000 + 0.05).toFixed(3);
+    const d = await apiFetch(API.ITEMS + '?since_hours=' + sinceHours);
+    let arr = [];
+    arr = unwrapItems(d);
+
+    let newMsgs = 0;
+    arr.forEach(it => {
+      let raw = {};
+      try { raw = JSON.parse(it.raw_json || '{}'); } catch(e) {}
+      const ts = new Date(it.created_at || 0).getTime();
+      if (ts > lastPollTs && raw.assistant_message && it.source !== 'chat') {
+        aiMsg('b', raw.assistant_message, it.item_type ? { tag: it.item_type.toUpperCase() } : null);
+        newMsgs++;
+      }
+      const exists = T.find(x => x.id === it.id);
+      if (!exists) {
+        T.unshift({
+          id: it.id, text: it.content || '', type: it.item_type || 'note',
+          priority: it.priority || 'normal', done: (it.status === 'done'),
+          tags: parseTags(it.tags_json || it.tags),
+          ts: new Date(it.created_at || Date.now()).getTime(),
+          external_id: it.external_id || it.id, source: it.source || 'sheet'
+        });
+      }
+    });
+    lastPollTs = Date.now();
+    if (newMsgs > 0) toast('🐺 ' + newMsgs + ' پیام جدید از فنریر', 'ok');
+    else toast('پیام جدیدی نیست', '', 1500);
+    renderAll(); rebuildB();
+  } catch(e) {
+    toast('⚠️ رفرش ناکام', 'err', 2000);
+  }
+  if (btn) btn.style.opacity = '1';
+}
+
+/* ════════════════════════════════════
+   CAPTURE BAR MIC — CORS-safe (base64 inline JSON)
+   ════════════════════════════════════ */
+let capRec=null, capChunks=[];
+async function capToggleMic(){
+  const btn=document.getElementById('cap-mic');
+  if(capRec){
+    if(capRec.state!=='inactive') capRec.stop();
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    capRec = new MediaRecorder(stream);
+    capChunks=[];
+    capRec.ondataavailable = e => capChunks.push(e.data);
+    capRec.onstop = async () => {
+      const blob = new Blob(capChunks, {type: capRec.mimeType || 'audio/webm'});
+      stream.getTracks().forEach(t=>t.stop());
+      capRec=null;
+      btn.classList.remove('rec'); btn.textContent='🎙️';
+      toast('🎙 ارسال ویس...');
+      // Convert to base64 — CORS-safe with text/plain JSON
+      let b64 = '';
+      try {
+        b64 = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result);
+          r.onerror = () => rej(new Error('read'));
+          r.readAsDataURL(blob);
+        });
+      } catch(_) {}
+      // Optimistic local item
+      const extId = 'voice_' + Date.now();
+      const newT = {
+        id: 'l'+Date.now(),
+        text: '🎙 پیام صوتی (' + Math.round(blob.size/1024) + ' KB)',
+        type: 'voice', priority: 'normal', done: false,
+        tags: ['voice','upload'], ts: Date.now(),
+        source: 'tma', external_id: extId,
+        attachment_type: 'voice', attachment_url: b64
+      };
+      T.unshift(newT); renderAll(); rebuildB();
+      try {
+        // Send to ITEMS so it persists. AI processing happens via a separate
+        // CLASSIFY call which gives a transcript if Whisper is wired up server-side.
+        const saveRes = await apiFetch(API.ITEMS, {
+          method: 'POST',
+          body: JSON.stringify({
+            source: 'tma',
+            external_id: extId,
+            content: '[VOICE message]',
+            author: USER_ID,
+            created_at: new Date().toISOString(),
+            item_type: 'voice',
+            priority: 'normal',
+            tags: ['voice','upload'],
+            attachment_url: b64,
+            attachment_type: 'voice',
+            attachment_size: blob.size,
+            attachment_text: 'voice_' + Date.now() + '.webm',
+            raw: { via: 'tma_capture_mic', mime: blob.type, size: blob.size }
+          })
+        });
+        if (saveRes && saveRes.id) newT.id = saveRes.id;
+        toast('✅ ویس ذخیره شد', 'ok');
+        HN('success');
+        burstP(window.innerWidth/2, window.innerHeight - 80);
+
+        // Optionally hit CLASSIFY for transcript (best-effort — not blocking)
+        apiFetch(API.CLASSIFY, {
+          method: 'POST',
+          body: JSON.stringify({
+            content: '[VOICE]', source: 'tma_voice', user_id: USER_ID,
+            audio_data: b64, audio_mime: blob.type, audio_size: blob.size
+          })
+        }).then(r => {
+          if (r && r.transcript) {
+            newT.text = '🎙 ' + r.transcript;
+            renderAll();
+            toast('📝 ویس تبدیل شد به متن', 'ok');
+          }
+          if (r && r.assistant_message) setAI(r.assistant_message);
+        }).catch(()=>{});
+      } catch(e){
+        toast('⚠️ ویس فقط محلی ذخیره شد','', 2500);
+      }
+    };
+    capRec.start();
+    btn.classList.add('rec');
+    toast('🎙 ضبط… دوباره بزن تا متوقف بشه');
+    H('heavy');
+  } catch(e) {
+    toast('❌ میکروفون در دسترس نیست','err');
+  }
+}
+
+/* ════════════════════════════════════
+   RENDER ALL
+   ════════════════════════════════════ */
+function renderAll(){ renderM(); renderV(); refreshS(); if(curTab===3) renderBkdn(); }
+
+/* ════════════════════════════════════
+   RADAR — upgraded with comet tails
+   ════════════════════════════════════ */
+const rcv=document.getElementById('radar'), rx=rcv.getContext('2d');
+let blips=[], rA=0;
+function rebuildB(){
+  // ▶ Show last 10 active (non-done) items, sorted by recency.
+  // High priority items orbit closer to center — they're the immediate threat.
+  const act = T.filter(t => !t.done)
+               .sort((a,b) => (b.ts||0) - (a.ts||0))
+               .slice(0, 10);
+  const N = Math.max(act.length, 1);
+  blips = act.map((t, i) => {
+    // Distribute angularly — even spacing with tiny jitter for organic feel
+    const a = (i / N) * Math.PI * 2 + (Math.random() * 0.18 - 0.09);
+    // Distance from center is inversely proportional to priority (high = close)
+    const baseD = t.priority === 'high' ? 42 : t.priority === 'normal' ? 78 : 110;
+    const d = baseD + (Math.random() * 14 - 7);
+    const col = t.priority === 'high' ? '#ff4466'
+              : t.priority === 'normal' ? '#ffb700' : '#00ff88';
+    return {
+      x: Math.cos(a) * d,
+      y: Math.sin(a) * d,
+      col, age: Math.random() * Math.PI * 2,
+      lbl: (t.type || 'note').slice(0,3).toUpperCase(),
+      task: t, sx: 0, sy: 0, trail: []
+    };
+  });
+}
+
+function drawR(){
+  const W=300,H=300,cx=150,cy=150,r=138;
+  rx.clearRect(0,0,W,H);
+  // radar bg gradient
+  const bg=rx.createRadialGradient(cx,cy,0,cx,cy,r);
+  bg.addColorStop(0,'rgba(10,0,35,.95)'); bg.addColorStop(.55,'rgba(5,0,22,.7)'); bg.addColorStop(1,'rgba(0,0,0,0)');
+  rx.fillStyle=bg; rx.fillRect(0,0,W,H);
+  // range rings
+  [.22,.44,.66,.88,1].forEach((f,i)=>{
+    rx.beginPath(); rx.arc(cx,cy,r*f,0,Math.PI*2);
+    rx.strokeStyle = i===4 ? 'rgba(155,89,255,.28)' : i===2 ? 'rgba(0,255,136,.1)' : 'rgba(155,89,255,.06)';
+    rx.lineWidth = i===4 ? 1.2 : .5;
+    rx.stroke();
+  });
+  // cross lines
+  rx.strokeStyle='rgba(155,89,255,.055)'; rx.lineWidth=.5;
+  for(let a=0;a<Math.PI*2;a+=Math.PI/6){ rx.beginPath();rx.moveTo(cx,cy);rx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);rx.stroke() }
+  // sweep
+  rA=(rA+.018)%(Math.PI*2);
+  rx.save(); rx.translate(cx,cy);
+  for(let i=0;i<120;i++){
+    const a=rA-(i/120)*1.2;
+    rx.beginPath();rx.moveTo(0,0);rx.arc(0,0,r,a-.028,a+.028);rx.closePath();
+    rx.fillStyle=`rgba(0,255,136,${((120-i)/120)*.1})`; rx.fill();
+  }
+  for(let i=0;i<65;i++){
+    const a=rA-.18-(i/65)*.75;
+    rx.beginPath();rx.moveTo(0,0);rx.arc(0,0,r,a-.022,a+.022);rx.closePath();
+    rx.fillStyle=`rgba(155,89,255,${((65-i)/65)*.055})`; rx.fill();
+  }
+  rx.beginPath();rx.moveTo(0,0);rx.lineTo(Math.cos(rA)*r,Math.sin(rA)*r);
+  rx.strokeStyle='rgba(0,255,136,.65)'; rx.lineWidth=1.8;
+  rx.shadowBlur=8; rx.shadowColor='#00ff88'; rx.stroke(); rx.shadowBlur=0;
+  rx.restore();
+  // blips with comet tails
+  blips.forEach(b=>{
+    b.age+=.03;
+    // gentle drift to feel alive
+    const driftX = Math.sin(b.age*.7+b.x*.01)*.8;
+    const driftY = Math.cos(b.age*.7+b.y*.01)*.8;
+    const px=cx+b.x+driftX, py=cy+b.y+driftY;
+    b.sx=px; b.sy=py;
+    // trail
+    b.trail.push({x:px,y:py});
+    if(b.trail.length>10) b.trail.shift();
+    for(let i=0;i<b.trail.length-1;i++){
+      const op=(i/b.trail.length)*.35;
+      rx.beginPath(); rx.moveTo(b.trail[i].x,b.trail[i].y); rx.lineTo(b.trail[i+1].x,b.trail[i+1].y);
+      rx.strokeStyle=b.col.replace(')',`,${op})`).replace('#','rgba(').length<10?`${b.col}${Math.floor(op*255).toString(16).padStart(2,'0')}`:b.col;
+      rx.lineWidth=1.5; rx.stroke();
+    }
+    const pulse=(Math.sin(b.age)+1)/2;
+    rx.shadowBlur=12; rx.shadowColor=b.col;
+    rx.beginPath();rx.arc(px,py,3.2,0,Math.PI*2);rx.fillStyle=b.col;rx.fill();rx.shadowBlur=0;
+    const rgb={'#ff4466':'255,68,102','#ffb700':'255,183,0','#00ff88':'0,255,136'}[b.col]||'155,89,255';
+    rx.beginPath();rx.arc(px,py,5+pulse*5.5,0,Math.PI*2);rx.strokeStyle=`rgba(${rgb},${.32*pulse})`;rx.lineWidth=.9;rx.stroke();
+    rx.fillStyle='rgba(232,240,255,.55)';rx.font='6.5px "Share Tech Mono",monospace';rx.textAlign='center';rx.fillText(b.lbl,px,py-9);
+  });
+  // center pulsar
+  const hue=(Date.now()/40)%360;
+  rx.shadowBlur=14; rx.shadowColor=`hsl(${hue},100%,65%)`;
+  rx.beginPath();rx.arc(cx,cy,4,0,Math.PI*2);rx.fillStyle='#fff';rx.fill();
+  rx.beginPath();rx.arc(cx,cy,8+Math.sin(Date.now()/300)*3,0,Math.PI*2);
+  rx.strokeStyle=`hsla(${hue},100%,65%,.5)`; rx.lineWidth=1.2; rx.stroke();
+  rx.shadowBlur=0;
+  requestAnimationFrame(drawR);
+}
+
+rcv.addEventListener('click',e=>{
+  const rect=rcv.getBoundingClientRect();
+  const sx=rcv.width/rect.width, sy=rcv.height/rect.height;
+  const mx=(e.clientX-rect.left)*sx, my=(e.clientY-rect.top)*sy;
+  let hit=null, minD=24;
+  blips.forEach(b=>{const d=Math.hypot(mx-b.sx,my-b.sy);if(d<minD){minD=d;hit=b}});
+  if(hit){ H(); showBTT(e,hit); setTimeout(()=>goMsn(hit.task.id),1100) }
+  else hideBTT();
+});
+
+function showBTT(e,b){
+  const tt=document.getElementById('btt');
+  document.getElementById('bt-ty').textContent=b.task.type.toUpperCase();
+  document.getElementById('bt-tx').textContent=b.task.text;
+  document.getElementById('bt-pr').textContent={'high':'🔴 HIGH','normal':'🟡 NORMAL','low':'🟢 LOW'}[b.task.priority]||'';
+  document.getElementById('bt-pr').style.color=b.col;
+  const vp=document.getElementById('p0').getBoundingClientRect();
+  tt.style.left=Math.min(e.clientX+8,vp.right-185)+'px';
+  tt.style.top=Math.max(e.clientY-60,vp.top+8)+'px';
+  tt.classList.add('show'); setTimeout(()=>tt.classList.remove('show'),2200);
+}
+function hideBTT(){ document.getElementById('btt').classList.remove('show') }
+
+function goMsn(id){
+  flt('all',document.querySelectorAll('.fp')[0]);
+  gt(1,document.querySelectorAll('.tab')[1]);
+  setTimeout(()=>{
+    const idx=T.findIndex(t=>t.id===id);
+    const items=document.querySelectorAll('.msn');
+    if(idx>=0 && items[idx]){
+      items[idx].scrollIntoView({behavior:'smooth',block:'center'});
+      items[idx].style.transition='background .6s';
+      items[idx].style.background='rgba(155,89,255,.18)';
+      setTimeout(()=>{ items[idx].style.background='' },800);
+    }
+  },200);
+}
+
+/* ════════════════════════════════════
+   COSMOS — stars + shooting stars + comets + nebulae
+   ════════════════════════════════════ */
+const cv=document.getElementById('cosmos'), cx2=cv.getContext('2d');
+function rsz(){ cv.width=window.innerWidth; cv.height=window.innerHeight }
+rsz(); window.addEventListener('resize',rsz);
+
+// Twinkling stars — denser, more varied
+const stars=Array.from({length:320},()=>({
+  x:Math.random(), y:Math.random(),
+  r:Math.random()*1.4+.2,
+  a:Math.random(), s:Math.random()*.006+.001,
+  hue: Math.random()>.75 ? (Math.random()>.5?270:200) : 0,
+  sat: Math.random()>.75 ? 80 : 0,
+  twinkleSpeed: Math.random()*.08+.02
+}));
+
+// Bright "hero" stars with cross-flare
+const heroStars=Array.from({length:8},()=>({
+  x:Math.random(), y:Math.random()*.7,
+  size:Math.random()*2+2,
+  a:Math.random()*Math.PI*2,
+  hue: Math.random()>.5 ? 270 : (Math.random()>.5?200:160)
+}));
+
+// Nebulae clouds
+const nebs=[
+  {x:.8, y:.12, r:.35, h:270, op:.1},
+  {x:.12,y:.78, r:.3,  h:185, op:.08},
+  {x:.5, y:.45, r:.45, h:255, op:.06},
+  {x:.9, y:.85, r:.25, h:290, op:.08},
+  {x:.2, y:.25, r:.22, h:215, op:.05},
+  {x:.65,y:.62, r:.18, h:310, op:.06},
+];
+
+// Shooting stars & comets
+let shooters=[];
+function spawnShooter(){
+  const isComet = Math.random()<.3;
+  shooters.push({
+    x: -50 - Math.random()*100,
+    y: Math.random()*cv.height*.6,
+    vx: 7+Math.random()*5,
+    vy: 2+Math.random()*3,
+    life: 0,
+    maxLife: isComet ? 280 : 90,
+    isComet,
+    hue: isComet ? (Math.random()>.5?180:275) : (Math.random()>.6?270:0),
+    size: isComet ? 2.5+Math.random()*1.5 : 1.5+Math.random()*1
+  });
+}
+// Shooting star spawn rate
+setInterval(()=>{ if(Math.random()<.6) spawnShooter() }, 1800);
+// Comet extra rare
+setInterval(()=>{ if(Math.random()<.4){ const s={x:-80,y:Math.random()*cv.height*.5,vx:5+Math.random()*3,vy:1.5+Math.random()*2,life:0,maxLife:320,isComet:true,hue:Math.random()>.5?185:290,size:3+Math.random()*1.5}; shooters.push(s) } }, 9000);
+
+// Pulsar (distant)
+const pulsar = { x: .84, y: .18, phase: 0 };
+
+function drawC(){
+  const W=cv.width, H=cv.height;
+  cx2.clearRect(0,0,W,H);
+  // deep space gradient
+  const bg = cx2.createRadialGradient(W*.5, H*.4, 0, W*.5, H*.4, Math.max(W,H)*.95);
+  bg.addColorStop(0,'#07002a');
+  bg.addColorStop(.45,'#03000e');
+  bg.addColorStop(1,'#000003');
+  cx2.fillStyle=bg; cx2.fillRect(0,0,W,H);
+  // nebulae
+  nebs.forEach(n=>{
+    const ng = cx2.createRadialGradient(W*n.x, H*n.y, 0, W*n.x, H*n.y, Math.min(W,H)*n.r);
+    ng.addColorStop(0, `hsla(${n.h},80%,55%,${n.op})`);
+    ng.addColorStop(.6, `hsla(${n.h},80%,55%,${n.op*.3})`);
+    ng.addColorStop(1, 'transparent');
+    cx2.fillStyle=ng; cx2.fillRect(0,0,W,H);
+  });
+  // twinkling stars
+  stars.forEach(s=>{
+    s.a += s.twinkleSpeed;
+    const op = (Math.sin(s.a)+1)/2;
+    cx2.fillStyle = s.sat
+      ? `hsla(${s.hue},${s.sat}%,82%,${op*.9})`
+      : `rgba(215,225,255,${op*.7})`;
+    cx2.beginPath(); cx2.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2); cx2.fill();
+  });
+  // hero stars with cross-flare
+  heroStars.forEach(s=>{
+    s.a += .02;
+    const px=s.x*W, py=s.y*H, op=(Math.sin(s.a)+1)/2*.7+.3;
+    cx2.shadowBlur=10; cx2.shadowColor=`hsla(${s.hue},90%,75%,${op})`;
+    cx2.fillStyle=`hsla(${s.hue},90%,90%,${op})`;
+    cx2.beginPath(); cx2.arc(px,py,s.size,0,Math.PI*2); cx2.fill();
+    // cross flare
+    cx2.strokeStyle=`hsla(${s.hue},90%,85%,${op*.6})`; cx2.lineWidth=.8;
+    cx2.beginPath(); cx2.moveTo(px-s.size*4,py); cx2.lineTo(px+s.size*4,py);
+    cx2.moveTo(px,py-s.size*4); cx2.lineTo(px,py+s.size*4); cx2.stroke();
+    cx2.shadowBlur=0;
+  });
+  // distant pulsar
+  pulsar.phase += .04;
+  const pulOp = Math.max(0, Math.sin(pulsar.phase));
+  const ppx=W*pulsar.x, ppy=H*pulsar.y;
+  cx2.shadowBlur=18; cx2.shadowColor=`rgba(0,255,200,${pulOp})`;
+  cx2.fillStyle=`rgba(200,255,230,${pulOp*.95})`;
+  cx2.beginPath(); cx2.arc(ppx,ppy,1.8,0,Math.PI*2); cx2.fill();
+  cx2.shadowBlur=0;
+  if(pulOp>.3){
+    cx2.strokeStyle=`rgba(0,255,200,${(pulOp-.3)*.5})`; cx2.lineWidth=.8;
+    cx2.beginPath(); cx2.arc(ppx,ppy, 4+pulsar.phase%15, 0, Math.PI*2); cx2.stroke();
+  }
+  // shooting stars / comets
+  shooters = shooters.filter(s=>{
+    s.life++;
+    s.x += s.vx; s.y += s.vy;
+    if(s.life>s.maxLife || s.x>W+120 || s.y>H+120) return false;
+    const lifeRatio = s.life/s.maxLife;
+    const headOp = Math.sin(lifeRatio*Math.PI); // fade in & out
+    const trailLen = s.isComet ? 180 : 70;
+    // tail gradient
+    const tailX = s.x - s.vx*trailLen/Math.hypot(s.vx,s.vy);
+    const tailY = s.y - s.vy*trailLen/Math.hypot(s.vx,s.vy);
+    const grad = cx2.createLinearGradient(s.x, s.y, tailX, tailY);
+    grad.addColorStop(0, `hsla(${s.hue},100%,80%,${headOp*.95})`);
+    grad.addColorStop(.4, `hsla(${s.hue},100%,70%,${headOp*.45})`);
+    grad.addColorStop(1, 'transparent');
+    cx2.strokeStyle=grad; cx2.lineWidth = s.isComet ? 2.2 : 1.3;
+    cx2.beginPath(); cx2.moveTo(s.x,s.y); cx2.lineTo(tailX,tailY); cx2.stroke();
+    // comet head glow + coma
+    if(s.isComet){
+      const r1 = cx2.createRadialGradient(s.x,s.y,0, s.x,s.y, s.size*8);
+      r1.addColorStop(0, `hsla(${s.hue},100%,85%,${headOp*.7})`);
+      r1.addColorStop(.5, `hsla(${s.hue},100%,65%,${headOp*.2})`);
+      r1.addColorStop(1, 'transparent');
+      cx2.fillStyle=r1;
+      cx2.beginPath(); cx2.arc(s.x,s.y, s.size*8, 0, Math.PI*2); cx2.fill();
+    }
+    cx2.shadowBlur=12; cx2.shadowColor=`hsla(${s.hue},100%,80%,${headOp})`;
+    cx2.fillStyle=`hsla(${s.hue},100%,90%,${headOp})`;
+    cx2.beginPath(); cx2.arc(s.x,s.y, s.size, 0, Math.PI*2); cx2.fill();
+    cx2.shadowBlur=0;
+    return true;
+  });
+  requestAnimationFrame(drawC);
+}
+drawC();
+
+/* ══ BOOT ══ */
+boots.forEach((m,i)=>setTimeout(()=>slog(m),(i+1)*220));
+renderAll(); rebuildB();
+</script>
+</body>
+</html>
