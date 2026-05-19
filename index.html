@@ -942,7 +942,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg0);color:var
       <div class="card" style="margin-top:.9rem">
         <div class="sttl" style="margin-bottom:.45rem">SYSTEM STATUS</div>
         <div class="ss" id="syss">
-          N8N (orca-9595): <span class="ok">CHECKING...</span><br>
+          N8N (asal2007): <span class="ok">CHECKING...</span><br>
           GOOGLE SHEETS: <span class="ok">SYNCED</span><br>
           REMINDER SYS: <span class="ok">EVERY 10 MIN</span><br>
           AI GATEWAY: <span class="ok">ONLINE</span><br>
@@ -996,18 +996,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg0);color:var
 
 <script>
 /* ════════════════════════════════════════════════════════
-   API — دقیقاً همون endpoints Lux+ (orca-9595 preserved)
+   API — دقیقاً همون endpoints Lux+ (asal2007 preserved)
    ════════════════════════════════════════════════════════ */
 // ════════════════════════════════════════════════════════
-// CONFIG — orca-9595 (production instance)
+// CONFIG — asal2007 (production instance)
 // ════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════
 // ⚙️  CONFIG — فقط این خط رو عوض کن
 // لوکال:  http://localhost:5678/webhook
-// Cloud:  https://orca-9595.app.n8n.cloud/webhook
+// Cloud:  https://asal2007.app.n8n.cloud/webhook
 // بله:    http://YOUR-SERVER-IP:5678/webhook
 // ══════════════════════════════════════════════════════
-const N8N = 'https://orca-9595.app.n8n.cloud/webhook';
+const N8N = 'https://asal2007.app.n8n.cloud/webhook';
 const API = {
   // ▶ MAIN INBOUND — Scout Drone pipeline (text/classify/AI/DB)
   INBOUND:  N8N + '/telegram/lifeops_inbound',
@@ -1313,7 +1313,7 @@ async function loadLive(){
     const av = localStorage.getItem('lifeops_avatar');
     if (av) document.getElementById('uav').innerHTML = `<img src="${av}">`;
   } catch(_) {}
-  slog('SYNC → orca-9595 Sheets (last 7 days)...');
+  slog('SYNC → asal2007 Sheets (last 7 days)...');
   try {
     // ▶ Window: last 7 days (168 hours). Previously 720h (30 days) → too noisy.
     const d = await apiFetch(API.ITEMS + '?since_hours=168');
@@ -1889,7 +1889,7 @@ function renderBkdn(){
 }
 
 /* ══ LOG ══ */
-const boots=['FENRIR GALACTIC BOOT','CONNECTING orca-9595...','GOOGLE SHEETS → LINK','REMINDER SYS → EVERY 10M','COGNITIVE CORE → STANDBY','COSMOS ENGINE → ONLINE'];
+const boots=['FENRIR GALACTIC BOOT','CONNECTING asal2007...','GOOGLE SHEETS → LINK','REMINDER SYS → EVERY 10M','COGNITIVE CORE → STANDBY','COSMOS ENGINE → ONLINE'];
 function slog(msg){
   const el=document.getElementById('slog'); if(!el) return;
   const t=new Date().toTimeString().slice(0,5);
@@ -1900,7 +1900,7 @@ function slog(msg){
 /* ══ AI ADVISORY CARD ══ */
 const advs=[
   'مغِز شب‌گردت بیداره. <em>کمتر از ۱ ساعت</em> تا خاموشی.',
-  'Second Brain در حال sync با <strong>orca-9595</strong>.',
+  'Second Brain در حال sync با <strong>asal2007</strong>.',
   'دو عدد <strong>high priority</strong> در صف رادار.',
   '<em>Wolf Pack</em> در حالت تهاجمی. بترکون فرمانده.',
   'تا پایان امروز، <strong>۳ تیر نهایی</strong> برای پاکسازی.',
